@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.worldkey.mapper.CommentMapper">
+    <resultMap id="BaseResultMap" type="com.worldkey.entity.Comment">
+        <id column="comment_id" jdbcType="BIGINT" property="commentId"/>
+        <result column="information" jdbcType="BIGINT" property="information"/>
+        <result column="info" jdbcType="VARCHAR" property="info"/>
+        <!-- <result column="users" jdbcType="BIGINT" property="users" />-->
+        <result column="gmt_create" jdbcType="TIMESTAMP" property="gmtCreate"/>
+        <result column="author" jdbcType="BIGINT" property="author"/>
+        <result column="type" jdbcType="TINYINT" property="type"/>
+        <result column="reply_count" jdbcType="INTEGER" property="replyCount"/>
+        <result column="comment" jdbcType="BIGINT" property="comment"/>
+        <!-- 必须放最后 -->
+        <association property="users" column="users" javaType="com.worldkey.entity.Users" select="selectUsers"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        comment_id, information, info,type, users, gmt_create, author, comment , reply_count
+    </sql>
+    <resultMap id="ResultMapWithReply" extends="BaseResultMap" type="com.worldkey.entity.Comment">
+        <collection property="replys" javaType="ArrayList" column="comment_id" ofType="com.worldkey.entity.Comment" select="selectReply" />
+    </resultMap>
+
+
+    <select id="selectReply" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+        select
+            comment_id,  info, users, gmt_create, comment
+        from comment
+        where comment.type = 1 AND comment.comment = #{commentId}
+        LIMIT 0,2
+    </select>
+
+    <!-- 获取users对象 -->
+    <select id="selectUsers" resultMap="com.worldkey.mapper.UsersMapper.BaseResultMap" parameterType="java.lang.Long">
+        SELECT
+            id,
+            login_name,
+            pet_name,
+            head_img
+        FROM users
+        WHERE id = #{users,jdbcType=BIGINT}
+    </select>
+    <!-- type 0为评论，1为回复 -->
+    <select id="selectByInformationOrderByIdDesc" parameterType="java.lang.Long" resultMap="ResultMapWithReply">
+        select
+        <include refid="Base_Column_List"/>
+        from comment
+        where comment.type = 0 AND comment.information = #{information,jdbcType=BIGINT}
+        ORDER BY comment_id DESC
+    </select>
+
+
+    <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from comment
+        where comment_id = #{commentId,jdbcType=BIGINT}
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM comment
+        WHERE comment_id = #{commentId,jdbcType=BIGINT}
+    </delete>
+    <insert id="insert" parameterType="com.worldkey.entity.Comment">
+        INSERT INTO comment (comment_id, information, info,
+                             users, gmt_create, author,
+                             type, comment)
+        VALUES (#{commentId,jdbcType=BIGINT}, #{information,jdbcType=BIGINT}, #{info,jdbcType=VARCHAR},
+                #{users.id,jdbcType=BIGINT}, #{gmtCreate,jdbcType=TIMESTAMP}, #{author,jdbcType=BIGINT},
+                #{type,jdbcType=TINYINT}, #{comment,jdbcType=BIGINT})
+    </insert>
+    <insert id="insertSelective" parameterType="com.worldkey.entity.Comment">
+        insert into comment
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="commentId != null">
+                comment_id,
+            </if>
+            <if test="information != null">
+                information,
+            </if>
+            <if test="info != null">
+                info,
+            </if>
+            <if test="users != null">
+                users,
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create,
+            </if>
+            <if test="author != null">
+                author,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="comment != null">
+                comment,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="commentId != null">
+                #{commentId,jdbcType=BIGINT},
+            </if>
+            <if test="information != null">
+                #{information,jdbcType=BIGINT},
+            </if>
+            <if test="info != null">
+                #{info,jdbcType=VARCHAR},
+            </if>
+            <if test="users != null">
+                #{users.id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="author != null">
+                #{author,jdbcType=BIGINT},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=TINYINT},
+            </if>
+            <if test="comment != null">
+                #{comment,jdbcType=BIGINT},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.worldkey.entity.Comment">
+        update comment
+        <set>
+            <if test="information != null">
+                information = #{information,jdbcType=BIGINT},
+            </if>
+            <if test="info != null">
+                info = #{info,jdbcType=VARCHAR},
+            </if>
+            <if test="users != null">
+                users = #{users.id,jdbcType=BIGINT},
+            </if>
+            <if test="gmtCreate != null">
+                gmt_create = #{gmtCreate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="author != null">
+                author = #{author,jdbcType=BIGINT},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=TINYINT},
+            </if>
+            <if test="comment != null">
+                comment = #{comment,jdbcType=BIGINT},
+            </if>
+        </set>
+        where comment_id = #{commentId,jdbcType=BIGINT}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.worldkey.entity.Comment">
+        UPDATE comment
+        SET information = #{information,jdbcType=BIGINT},
+            info        = #{info,jdbcType=VARCHAR},
+            users       = #{users.id,jdbcType=BIGINT},
+            gmt_create  = #{gmtCreate,jdbcType=TIMESTAMP},
+            author      = #{author,jdbcType=BIGINT},
+            type        = #{type,jdbcType=TINYINT},
+            comment     = #{comment,jdbcType=BIGINT}
+        WHERE comment_id = #{commentId,jdbcType=BIGINT}
+    </update>
+</mapper>

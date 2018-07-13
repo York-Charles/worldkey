@@ -1,0 +1,93 @@
+@CHARSET "UTF-8";
+body {
+	background-color: #ffffff;
+	margin: 0 auto;
+}
+input[type=text], select {
+	margin-bottom:10px;
+	font-size: 14px;
+	border: 1pt solid #dbb769;
+	height: 30px;
+	line-height: 30px;
+	border-radius: 5px;
+}
+
+input[type=image] {
+	display: inline-block;
+	vertical-align: middle;
+}
+
+select {
+	width: 124px;
+	margin-left: 10px;
+}
+
+.add {
+	vertical-align: middle;
+	display: inline-block;
+	margin-left: 56px;
+	margin-top: 3px;
+}
+img{
+vertical-align: middle;
+display: inline-block;
+}
+a {
+	text-decoration: none;
+	color: #333;
+}
+
+.add>span {
+	vertical-align: middle;
+	font-size: 14px;
+	height: 27px;
+	display: inline-block;
+	line-height: 27px;
+}
+
+hr {
+	color: #e4e4e4;
+}
+
+table {
+	border-left: 1px solid rgb(203, 203, 203);
+	border-top: 1px solid rgb(203, 203, 203);;
+}
+
+tr, td {
+	margin: 0px;
+	padding: 0px;
+}
+
+td {
+	text-align: center;
+	height: 30px;
+	line-height: 30px;
+	border-bottom: 1px solid rgb(203, 203, 203);
+	border-right: 1px solid rgb(203, 203, 203);
+	padding-left: 14px;
+	padding-right: 14px;
+}
+
+tr:hover {
+	background: lightgreen;
+	cursor: pointer;
+}
+
+#pagebox {
+	margin-left: 30%;
+	margin-top: 10px;
+}
+.compile{
+border-right: 1px solid #dbb769;
+padding-right: 10px;
+margin-bottom: 1pt;
+}
+.del{
+padding-left: 5px;
+}
+span{
+display: inline-block;
+text-align: center;
+}
+

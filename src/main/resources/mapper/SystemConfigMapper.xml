@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.SystemConfigMapper">
+	<resultMap id="BaseResultMap" type="com.worldkey.entity.SystemConfig">
+		<result column="fileSrc" property="filesrc" jdbcType="VARCHAR" />
+		<result column="imgPath" property="imgPath" jdbcType="VARCHAR" />
+		<result column="emailfrom" property="emailfrom" jdbcType="VARCHAR" />
+		<result column="emailhost" property="emailhost" jdbcType="VARCHAR" />
+		<result column="emailpassword" property="emailpassword"
+			jdbcType="VARCHAR" />
+		<result column="text" property="text" jdbcType="VARCHAR" />
+		<result column="default_headimg" property="defaultHeadimg"
+			jdbcType="VARCHAR" />
+		<result column="subject" property="subject" jdbcType="VARCHAR" />
+	</resultMap>
+	<!-- <select id="find" resultType="com.worldkey.entity.SystemConfig"> select 
+		* from system_config </select> -->
+	<!-- <select id="find" resultMap="BaseResultMap"> select fileSrc as filesrc,imgPath,emailfrom,emailhost,emailpassword,text,subject 
+		from system_config </select> -->
+	<insert id="insert" parameterType="com.worldkey.entity.SystemConfig">
+		insert into system_config
+		(fileSrc, imgPath, emailfrom,
+		emailhost, emailpassword, text,
+		subject)
+		values (#{filesrc,jdbcType=VARCHAR}, #{imgPath,jdbcType=VARCHAR},
+		#{emailfrom,jdbcType=VARCHAR},
+		#{emailhost,jdbcType=VARCHAR},
+		#{emailpassword,jdbcType=VARCHAR}, #{text,jdbcType=VARCHAR},
+		#{subject,jdbcType=VARCHAR})
+	</insert>
+
+	<update id="update" parameterType="com.worldkey.entity.SystemConfig">
+		UPDATE system_config SET
+		<trim suffixOverrides=",">
+			<if test="defaultHeadimg!=null">
+				default_headimg=#{defaultHeadimg},
+			</if>
+			<if test="filesrc != null">
+				fileSrc=#{filesrc},
+			</if>
+			<if test="imgPath != null">
+				imgPath=#{imgPath},
+			</if>
+			<if test="emailfrom != null">
+				emailfrom=#{emailfrom},
+			</if>
+			<if test="emailhost != null">
+				emailhost=#{emailfrom},
+			</if>
+			<if test="emailpassword != null">
+				emailpassword=#{emailpassword},
+			</if>
+			<if test="text != null">
+				text=#{text},
+			</if>
+			<if test="subject != null">
+				subject=#{subject},
+			</if>
+		</trim>
+	</update>
+
+
+
+	<insert id="insertSelective" parameterType="com.worldkey.entity.SystemConfig">
+		insert into system_config
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="filesrc != null">
+				fileSrc,
+			</if>
+			<if test="imgPath != null">
+				imgPath,
+			</if>
+			<if test="emailfrom != null">
+				emailfrom,
+			</if>
+			<if test="emailhost != null">
+				emailhost,
+			</if>
+			<if test="emailpassword != null">
+				emailpassword,
+			</if>
+			<if test="text != null">
+				text,
+			</if>
+			<if test="subject != null">
+				subject,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="filesrc != null">
+				#{filesrc,jdbcType=VARCHAR},
+			</if>
+			<if test="imgPath != null">
+				#{imgPath,jdbcType=VARCHAR},
+			</if>
+			<if test="emailfrom != null">
+				#{emailfrom,jdbcType=VARCHAR},
+			</if>
+			<if test="emailhost != null">
+				#{emailhost,jdbcType=VARCHAR},
+			</if>
+			<if test="emailpassword != null">
+				#{emailpassword,jdbcType=VARCHAR},
+			</if>
+			<if test="text != null">
+				#{text,jdbcType=VARCHAR},
+			</if>
+			<if test="subject != null">
+				#{subject,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+</mapper>

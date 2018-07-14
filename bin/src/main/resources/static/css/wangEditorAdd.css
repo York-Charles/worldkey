@@ -1,0 +1,27 @@
+@CHARSET "UTF-8";
+#WE{
+width: 720px;
+height: 400px;
+margin-top: 10px;
+}
+#textarea1{
+height: 400px;
+line-height: 30px;
+}
+p{
+margin: 0;
+padding: 0;
+}
+input{
+	 margin-top:5px;
+	line-height: 23px; 
+}
+
+body{
+	margin: 20px auto;
+	width: 800px;
+}
+input[type=submit]{
+	display:inline-block;
+	height: 35px;
+}

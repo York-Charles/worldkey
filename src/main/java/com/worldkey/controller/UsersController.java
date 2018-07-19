@@ -297,8 +297,4 @@ public class UsersController {
 			@RequestParam(value="pageSize",defaultValue="10")Integer pageSize){
     	return new ResultUtil(200 ,"ok",this.uService.getStars(userId, pageNum, pageSize));
     }
-    
-    public ResultUtil bbb(){
-    	return new ResultUtil();
-    }
 }

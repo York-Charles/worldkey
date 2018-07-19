@@ -298,7 +298,7 @@ public class UsersController {
     	return new ResultUtil(200 ,"ok",this.uService.getStars(userId, pageNum, pageSize));
     }
     
-    public ResultUtil aaa(){
+    public ResultUtil bbb(){
     	return new ResultUtil();
     }
 }

@@ -1,0 +1,454 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.InformationAllMapper">
+
+    <resultMap id="BaseResultMap" type="com.worldkey.entity.InformationAll">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="create_date" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="title_img" property="titleImg" jdbcType="VARCHAR"/>
+        <result column="type" property="type" jdbcType="INTEGER"/>
+        <result column="weburl" property="weburl" jdbcType="VARCHAR"/>
+        <result column="abstracte" property="abstracte" jdbcType="VARCHAR"/>
+        <result column="auther" property="auther" jdbcType="VARCHAR"/>
+        <result column="point_number" property="pointNumber" jdbcType="INTEGER"/>
+        <result column="checked" property="checked" jdbcType="INTEGER"/>
+        <result column="classify" property="classify" jdbcType="INTEGER"/>
+        <result column="competitive" property="competitive" jdbcType="INTEGER"/>
+        <result column="user_brand" property="userBrand" jdbcType="INTEGER"/>
+        <association property="users" column="users" javaType="com.worldkey.entity.Users"
+                     select="com.worldkey.mapper.UsersMapper.selectByPrimaryKey"/>
+    </resultMap>
+    <resultMap id="ResultMapWithBLOBs" type="com.worldkey.entity.InformationAll" extends="BaseResultMap">
+        <result column="info" property="info" jdbcType="LONGVARCHAR"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        id, create_date, title, title_img, type, weburl, abstracte, auther, point_number, checked, users,classify,competitive,user_brand
+    </sql>
+    <sql id="Blob_Column_List">
+        info
+    </sql>
+
+    <resultMap id="BaseShowResultMap" type="com.worldkey.entity.BaseShow">
+        <id column="id" property="id" jdbcType="INTEGER"/>
+        <result column="createDate" property="createDate" jdbcType="TIMESTAMP"/>
+        <result column="title" property="title" jdbcType="VARCHAR"/>
+        <result column="titleImg" property="titleImg" jdbcType="VARCHAR"/>
+        <result column="webUrl" property="webUrl" jdbcType="VARCHAR"/>
+        <result column="praiseNum" property="praiseNum" jdbcType="INTEGER"/>
+        <association property="commentNum" column="id" javaType="java.lang.Integer"
+                     select="com.worldkey.mapper.InformationAllMapper.selectCommentNum"/>
+    </resultMap>
+
+    <select id="selectCommentNum" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+        SELECT (SELECT count(*)
+                FROM
+                    `comment` AS c
+                WHERE c.information = #{id,jdbcType=INTEGER}) + (SELECT count(*)
+                                                                 FROM
+                                                                     `comment` AS c
+                                                                 WHERE c.`comment` IN (SELECT co.comment_id
+                                                                                       FROM
+                                                                                           `comment` AS co
+                                                                                       WHERE co.information =
+                                                                                             #{id,jdbcType=INTEGER})) AS commentNum
+    </select>
+
+
+    <select id="selectByOneTypeName" resultMap="BaseShowResultMap">
+        SELECT
+            i.id,
+            i.title       AS title,
+            i.title_img   AS titleImg,
+            i.classify    As classify,
+            pm.praise_num AS praiseNum,
+            i.weburl      AS webUrl,
+            i.create_date AS createDate
+        FROM
+            information_all AS i
+            LEFT JOIN praise_num AS pm ON i.id = pm.information
+        WHERE
+            i.type IN (
+                SELECT t.id
+                FROM
+                    two_type t
+                WHERE
+                    t.one_type = (
+                        SELECT o.id
+                        FROM
+                            one_type AS o
+                        WHERE
+                            o.type_name = #{oneTypeName,jdbcType=VARCHAR}
+                    )
+            )
+            AND i.users = #{userId,jdbcType=INTEGER}
+        ORDER BY i.create_date DESC
+    </select>
+<!-- 4.23修改three_type 99行 -->
+    <select id="selectByTwoTypeName" resultMap="BaseShowResultMap">
+        SELECT
+            i.id,
+            i.title       AS title,
+            i.title_img   AS titleImg,
+             i.classify    As classify,
+            pm.praise_num AS praiseNum,
+            i.weburl      AS webUrl,
+            i.create_date AS createDate
+        FROM
+            information_all AS i
+            LEFT JOIN praise_num AS pm ON i.id = pm.information
+        WHERE
+            i.type IN (
+                SELECT t.id
+                FROM
+                    three_type t
+                WHERE
+                    t.type_name = #{twoTypeName,jdbcType=VARCHAR}
+            )
+            AND i.users = #{userId,jdbcType=INTEGER}
+        ORDER BY i.create_date DESC
+    </select>
+    <select id="selectByPermaryKeys" resultMap="BaseShowResultMap">
+        select
+        id, title, title_img as titleImg, type, weburl, abstracte, auther, point_number,classify as pointNumber
+        ,users as user,
+        <include refid="Blob_Column_List"/>
+        from information_all
+        where checked=1 AND id in
+        <foreach collection="list" index="ids" item="item" close=")" separator="," open="(">
+            #{item}
+        </foreach>
+    </select>
+
+    <select id="SelectByIds" resultMap="BaseShowResultMap">
+        SELECT
+        i.id,
+        i.title AS title,
+        i.title_img AS titleImg,
+         i.classify    As classify,
+        pm.praise_num AS praiseNum,
+        i.weburl AS webUrl,
+        i.create_date AS createDate,
+        i.auther AS author
+        FROM
+        information_all AS i
+        LEFT JOIN praise_num AS pm ON i.id = pm.information
+        where checked=1 AND i.id in
+        <foreach collection="list" index="ids" item="item" close=")" separator="," open="(">
+            #{item}
+        </foreach>
+    </select>
+<!-- 4.21修改   -->
+    <select id="usersSelectBySelective" resultMap="BaseResultMap" parameterType="com.worldkey.entity.InformationAll">
+        SELECT
+        i.id,
+        i.create_date,
+        i.title,
+        i.title_img,
+        i.info,
+        i.type,
+        i.weburl,
+        i.abstracte,
+        i.auther,
+        i.point_number,
+        i.checked,
+         i.classify
+        FROM
+        users AS u
+        INNER JOIN information_all AS i ON i.users = u.id
+        INNER JOIN three_type AS t ON i.type = t.id
+        <where>
+            <if test="users.id!=null">
+                u.id = #{users.id}
+            </if>
+            <if test="type!=null">
+                AND t.id = #{type}
+            </if>
+            <if test="title!=null">
+                AND i.title LIKE concat('%',#{title},'%')
+            </if>
+            <if test="checked!=2">
+                AND i.checked !=2
+            </if>
+            <if test="checked==2">
+                AND i.checked =2
+            </if>
+        </where>
+        ORDER BY
+        i.id DESC
+    </select>
+<!-- 4.21修改   -->
+    <select id="selectByOneType" resultMap="BaseResultMap" parameterType="com.worldkey.entity.InformationAll">
+        SELECT
+        i.id,
+        i.create_date,
+        i.title,
+        i.title_img,
+         i.classify,
+        i.type,
+        i.weburl,
+        i.abstracte,
+        i.auther,
+        i.point_number,
+        o.id,
+        i.checked
+        FROM
+        information_all AS i
+         INNER JOIN three_type AS r ON i.type = r.id 	
+         INNER JOIN two_type AS t ON r.two_type = t.id 
+        INNER JOIN one_type AS o ON t.one_type = o.id
+        <where>
+            <if test="checked!=null">
+                i.checked=#{checked}
+            </if>
+            <if test="type!=null">
+                AND o.id = #{type}
+            </if>
+            <if test="title!=null">
+                AND i.title LIKE concat('%',#{title},'%')
+            </if>
+        </where>
+        order by i.id desc
+    </select>
+    
+
+    <select id="selectByType" resultMap="BaseResultMap" parameterType="java.lang.Integer">
+        select
+        <include refid="Base_Column_List"/>
+        from information_all
+        where type = #{type,jdbcType=INTEGER}
+        order by id desc
+    </select>
+    <select id="selectBySelective" resultMap="BaseResultMap" parameterType="com.worldkey.entity.InformationAll">
+        select
+        <include refid="Base_Column_List"/>
+        from information_all
+        <where>
+            <if test="type!=null">
+                type = #{type,jdbcType=INTEGER}
+            </if>
+            <if test="title!=null">
+                AND title like concat(concat('%',#{title}),'%')
+            </if>
+            <if test="checked!=null">
+                AND checked=#{checked}
+            </if>
+        </where>
+        order by id desc
+    </select>
+    <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long">
+        select
+        <include refid="Base_Column_List"/>
+        ,
+        <include refid="Blob_Column_List"/>
+        from information_all
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="selectById" resultType="com.worldkey.entity.InformationExample" parameterType="java.lang.Long">
+        select
+        id, title, title_img as titleImg, type, weburl, abstracte, auther, point_number,classify as pointNumber
+        ,users as user,
+        <include refid="Blob_Column_List"/>
+        from information_all
+        where id = #{id,jdbcType=INTEGER}
+    </select>
+    <select id="findAll" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from information_all
+        where
+        checked !=2
+        order by id desc
+    </select>
+    <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+        DELETE FROM information_all
+        WHERE id = #{id,jdbcType=INTEGER}
+    </delete>
+    <insert id="insert" parameterType="com.worldkey.entity.InformationAll" keyProperty="id" useGeneratedKeys="true">
+        INSERT INTO information_all (id, create_date, title,
+                                     title_img, type, weburl,
+                                     abstracte, auther, point_number,
+                                     info,classify)
+        VALUES (#{id,jdbcType=INTEGER}, #{createDate,jdbcType=TIMESTAMP}, #{title,jdbcType=VARCHAR},
+                #{titleImg,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER}, #{weburl,jdbcType=VARCHAR},
+                #{abstracte,jdbcType=VARCHAR}, #{auther,jdbcType=VARCHAR}, #{pointNumber,jdbcType=INTEGER},
+                #{info,jdbcType=LONGVARCHAR},#{classify,jdbcType=INTEGER})
+    </insert>
+    <insert id="insertSelective" parameterType="com.worldkey.entity.InformationAll" keyProperty="id"
+            useGeneratedKeys="true">
+        insert into information_all
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="createDate != null">
+                create_date,
+            </if>
+            <if test="title != null">
+                title,
+            </if>
+            <if test="titleImg != null">
+                title_img,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+            <if test="weburl != null">
+                weburl,
+            </if>
+            <if test="abstracte != null">
+                abstracte,
+            </if>
+            <if test="auther != null">
+                auther,
+            </if>
+            <if test="pointNumber != null">
+                point_number,
+            </if>
+            <if test="info != null">
+                info,
+            </if>
+            <if test="users.id != null">
+                users,
+            </if>
+            <if test="checked != null">
+                checked,
+            </if>
+            <if test="showPush != null">
+                show_push,
+            </if>
+            <if test="classify != null">
+                classify,
+            </if>
+            <if test="userBrand != null">
+                user_brand,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                #{id,jdbcType=INTEGER},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="title != null">
+                #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="titleImg != null">
+                #{titleImg,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                #{type,jdbcType=INTEGER},
+            </if>
+            <if test="weburl != null">
+                #{weburl,jdbcType=VARCHAR},
+            </if>
+            <if test="abstracte != null">
+                #{abstracte,jdbcType=VARCHAR},
+            </if>
+            <if test="auther != null">
+                #{auther,jdbcType=VARCHAR},
+            </if>
+            <if test="pointNumber != null">
+                #{pointNumber,jdbcType=INTEGER},
+            </if>
+            <if test="info != null">
+                #{info,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="users.id != null">
+                #{users.id,jdbcType=INTEGER},
+            </if>
+            <if test="checked != null">
+                #{checked,jdbcType=INTEGER},
+            </if>
+            <if test="showPush != null">
+                #{showPush,jdbcType=INTEGER},
+            </if>
+             <if test="classify != null">
+               #{classify,jdbcType=INTEGER},
+            </if>
+            <if test="userBrand != null">
+               #{userBrand,jdbcType=INTEGER},
+            </if>
+        </trim>
+    </insert>
+    <update id="updateByPrimaryKeySelective" parameterType="com.worldkey.entity.InformationAll">
+        update information_all
+        <set>
+            <if test="createDate != null">
+                create_date = #{createDate,jdbcType=TIMESTAMP},
+            </if>
+            <if test="checked != null">
+                checked = #{checked,jdbcType=INTEGER},
+            </if>
+            <if test="title != null">
+                title = #{title,jdbcType=VARCHAR},
+            </if>
+            <if test="titleImg != null">
+                title_img = #{titleImg,jdbcType=VARCHAR},
+            </if>
+            <if test="type != null">
+                type = #{type,jdbcType=INTEGER},
+            </if>
+            <if test="weburl != null">
+                weburl = #{weburl,jdbcType=VARCHAR},
+            </if>
+            <if test="abstracte != null">
+                abstracte = #{abstracte,jdbcType=VARCHAR},
+            </if>
+            <if test="auther != null">
+                auther = #{auther,jdbcType=VARCHAR},
+            </if>
+            <if test="pointNumber != null">
+                point_number = #{pointNumber,jdbcType=INTEGER},
+            </if>
+            <if test="info != null">
+                info = #{info,jdbcType=LONGVARCHAR},
+            </if>
+            <if test="classify != null">
+            	classify = #{classify,jdbcType=INTEGER}
+            </if>
+            <if test="userBrand != null">
+            	user_brand = #{userBrand,jdbcType=INTEGER}
+            </if>
+        </set>
+        where id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.worldkey.entity.InformationAll">
+        UPDATE information_all
+        SET create_date  = #{createDate,jdbcType=TIMESTAMP},
+            title        = #{title,jdbcType=VARCHAR},
+            title_img    = #{titleImg,jdbcType=VARCHAR},
+            type         = #{type,jdbcType=INTEGER},
+            weburl       = #{weburl,jdbcType=VARCHAR},
+            abstracte    = #{abstracte,jdbcType=VARCHAR},
+            auther       = #{auther,jdbcType=VARCHAR},
+            point_number = #{pointNumber,jdbcType=INTEGER},
+            info         = #{info,jdbcType=LONGVARCHAR}
+        WHERE id = #{id,jdbcType=INTEGER}
+    </update>
+    <update id="updateByPrimaryKey" parameterType="com.worldkey.entity.InformationAll">
+        UPDATE information_all
+        SET create_date  = #{createDate,jdbcType=TIMESTAMP},
+            title        = #{title,jdbcType=VARCHAR},
+            title_img    = #{titleImg,jdbcType=VARCHAR},
+            type         = #{type,jdbcType=INTEGER},
+            weburl       = #{weburl,jdbcType=VARCHAR},
+            abstracte    = #{abstracte,jdbcType=VARCHAR},
+            auther       = #{auther,jdbcType=VARCHAR},
+            point_number = #{pointNumber,jdbcType=INTEGER}
+        WHERE id = #{id,jdbcType=INTEGER}
+    </update>
+    
+    
+  
+    
+    
+      <update id="zhiding" parameterType="java.lang.Long">
+       update information_all set id=(select id from
+		(select MAX(id) id from information_all) temp)+1 where id=#{id}
+    </update>
+  
+    
+    
+</mapper>

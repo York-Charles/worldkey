@@ -3,6 +3,8 @@ package com.worldkey.service;
 import com.worldkey.entity.Friend;
 import com.worldkey.entity.FriendExample;
 import com.worldkey.entity.Record;
+import com.worldkey.entity.Users;
+import com.worldkey.util.PrivateRequest;
 
 import io.rong.models.CodeSuccessResult;
 import io.rong.models.TokenResult;
@@ -27,7 +29,16 @@ public interface FriendService {
 
     int delFriend(Friend friend);
     
-    
     int record(String userId,String toUsersID,String message);
     List<Record> select(String toUserId);
+    
+    List<Integer> enlopeRequest(Users user,String type,String message,String... toUserId);
+    
+    String elopeHandler(Users user,String type,String message,String... toUserId);
+    
+    PrivateRequest infoCheck(String reqName, String message,String... toUserId);
+	
+	void infoCheck1(Users user,Users user1);
+	
+	void dissPeople(Users user,Users user1);
 }

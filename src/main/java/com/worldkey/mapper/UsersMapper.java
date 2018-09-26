@@ -155,5 +155,9 @@ public interface UsersMapper {
 		@Update("update users set personal_brand=1 where id=#{userId}")
 		Integer updatePersonalBrand(@Param("userId")Long userId);
 
-
+		@Select("select users.id from users,coffee_bar,coffee_scene,coffee_bar_user "
+					+"where coffee_bar.id=coffee_scene.bar_id and users.id=coffee_bar_user.user_id "
+					+"and coffee_bar.id=coffee_bar_user.coffee_bar_id "
+					+"and coffee_bar.id=#{barId} and coffee_scene.scene=#{sceneId}")
+		List<Integer> getUsersByBarIdAndRoomId(@Param("barId")Integer barId,@Param("sceneId")Integer sceneId);
 }

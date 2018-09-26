@@ -2,12 +2,13 @@ package com.worldkey.util;
 
 import java.util.List;
 
+@SuppressWarnings("rawtypes")
 public class Pager1 {//分页工具类
 	private int pageIndex;//当前页
 	private int pageSize;//分页数据大小
 	private int totalCount;//查询总数据
 	private int pages;//分页页数
-    private List list;//查询到的数据集合
+	private List list;//查询到的数据集合
     
     /*******开始结束页面初始化**********/
    /* private int startPage;

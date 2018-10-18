@@ -13,7 +13,7 @@
     <meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1">
     <script src="js/jquery-3.1.1.min.js"></script>
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css">
     <script src="http://code.jquery.com/jquery-migrate-1.0.0.js"></script>
     <link rel="stylesheet" type="text/css" href="css/manage1.css">
     <style type="text/css">

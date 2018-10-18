@@ -31,8 +31,6 @@ public interface InformationAllMapper {
     int insertSelective(InformationAll record);
 
     int insertSelectives(InformationAll record);
-    //置顶
-    int zhiding(@Param("id") Long id);
 
     InformationAll selectByPrimaryKey(Long id);
     
@@ -52,6 +50,28 @@ public interface InformationAllMapper {
     List<InformationAll> selectByOneType(InformationAll vo);
 
     List<InformationAll> selectBySelective(InformationAll vo);
+    
+    @Select("SELECT " +
+            "i.id, " +
+            "i.title AS title, " +
+            "i.title_img AS titleImg," +
+            "i.classify	AS classify," +
+            "pm.praise_num AS praiseNum," +
+            "i.weburl AS webUrl," +
+            "i.create_date AS createDate," +
+            "users.login_name AS loginName,"+
+            "users.head_img AS headImg , "+
+            "users.id AS usersId, " +
+            "i.auther AS author, " +
+            "users.pet_name AS petName "+
+            "FROM " +
+            "information_all AS i " +
+            "LEFT JOIN praise_num AS pm ON i.id = pm.information " +
+            "LEFT JOIN users on users.id=i.users "+
+            "WHERE type=#{type} " +
+            "ORDER BY " +
+            "i.create_date DESC")
+    List<BaseShow> selectBySelective1(InformationAll vo);
 
     @Update("UPDATE information_all "
             + " SET point_number=(SELECT point_number+1) "
@@ -62,6 +82,11 @@ public interface InformationAllMapper {
             + "SET checked=#{checked} ,create_date=#{createDate}"
             + " WHERE id=#{id}")
     int checked(InformationAll vo);
+    
+    @Update("UPDATE information_all "
+            + "SET solve=#{solve} ,create_date=#{createDate}"
+            + " WHERE id=#{id}")
+    int solve(InformationAll vo);
 
     List<InformationAll> usersSelectBySelective(InformationAll vo);
 
@@ -174,7 +199,8 @@ public interface InformationAllMapper {
             "            i.auther      AS author,    \n" +
             "			 i.users       AS usersId,   \n" +  
             "            u.login_name  AS loginName, \n" +
-            "			 u.head_img    AS headImg    \n" +
+            "			 u.head_img    AS headImg  , \n" +
+            " 			 u.pet_name    AS petName    \n" +
             "        FROM\n" +
             "            users AS u,\n" +
             "            information_all AS i\n" +
@@ -282,18 +308,20 @@ public interface InformationAllMapper {
             "			 i.classify    AS classify,\n"	+
             "            i.weburl      AS webUrl,\n" +
             "            i.create_date AS createDate,\n" +
+            "			 i.solve AS solve,\n" +
+            "            i.stick AS stick,\n" +
             "			 users.head_img AS headImg,\n" +
             "            users.login_name AS loginName,\n"	+
             "            pm.praise_num AS praiseNum,\n" +
             "            i.auther AS author,\n" +
             "			 i.users  AS usersId,\n"+  
-            " 				users.pet_name AS petName  \n"+
+            " 			 users.pet_name AS petName  \n"+
             "        FROM\n" +
             "            information_all AS i\n" +
             "			inner join users on users.id=i.users "+
             "            left join praise_num AS pm ON i.id = pm.information\n" +
             "        WHERE\n" +
-            "            i.type =#{threeType}   "+
+            "            i.type =#{threeType} and i.stick=0   "+
             "        ORDER BY  i.create_date DESC")
 //    @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectShowByThreeType1(@Param("threeType") Integer threeType);
@@ -526,5 +554,60 @@ public interface InformationAllMapper {
     
     @Select("select MAX(competitive) from information_all where users=#{id}")
     Integer selectMaxCompetitive(Long id);
+    
+    
+    @Update("update information_all set stick=1,stick_date=now() where id=#{id}")
+    Integer updateStick(Long id);
+    
+    @Update("update information_all set stick=0 where id=#{id}")
+    Integer updateStickup(Long id);
+    
+    @Select("select stick from information_all where id=#{id}")
+    Integer selectStick(Long id);
+    
+    @Select("SELECT\n" +
+            "            i.id,\n" +
+            "            i.title       AS title,\n" +
+            "            i.title_img   AS titleImg,\n" +
+            "			 i.classify    AS classify,\n"	+
+            "            i.weburl      AS webUrl,\n" +
+            "            i.create_date AS createDate,\n" +
+            "            i.stick AS stick,\n" +
+            "			 users.head_img AS headImg,\n" +
+            "            users.login_name AS loginName,\n"	+
+            "            pm.praise_num AS praiseNum,\n" +
+            "            i.auther AS author,\n" +
+            "			 i.users  AS usersId,\n"+  
+            " 				users.pet_name AS petName  \n"+
+            "        FROM\n" +
+            "            information_all AS i\n" +
+            "			inner join users on users.id=i.users "+
+            "            left join praise_num AS pm ON i.id = pm.information\n" +
+            "        WHERE\n" +
+            "            i.type =#{type} and i.stick=1   "+
+            "        ORDER BY  i.stick_date DESC")
+    List<BaseShow> findStick(Integer type);
 
+    @Select("SELECT\n" +
+            "            i.id,\n" +
+            "            i.title       AS title,\n" +
+            "            i.title_img   AS titleImg,\n" +
+            "			 i.classify    AS classify,\n"	+
+            "            i.weburl      AS webUrl,\n" +
+            "            i.create_date AS createDate,\n" +
+            "			 i.solve AS solve,\n" +
+            "            i.stick AS stick,\n" +
+            "			 users.head_img AS headImg,\n" +
+            "            users.login_name AS loginName,\n"	+
+            "            pm.praise_num AS praiseNum,\n" +
+            "            i.auther AS author,\n" +
+            "			 i.users  AS usersId,\n"+  
+            " 			 users.pet_name AS petName  \n"+
+            "        FROM\n" +
+            "            information_all AS i\n" +
+            "			inner join users on users.id=i.users "+
+            "            left join praise_num AS pm ON i.id = pm.information\n" +
+            "        WHERE\n" +
+            "            i.id =6258 ")
+    List<BaseShow> getshequ();
 }

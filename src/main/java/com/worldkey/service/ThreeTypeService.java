@@ -73,4 +73,10 @@ public interface ThreeTypeService extends IService<ThreeType> {
 	PageInfo<ThreeType> findOwnGroup(Integer userId,Integer pageNum,Integer pageSize);
 	
 	PageInfo<ThreeType> findJoinedGroup(Integer userId,Integer pageNum,Integer pageSize);
+	
+	
+	
+	
+	//搜索小组
+	PageInfo<ThreeType> getXiaozu(Integer pageNum,Integer pageSize,String name,String getXiaozu);
 }

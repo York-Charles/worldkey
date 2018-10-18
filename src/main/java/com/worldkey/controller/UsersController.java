@@ -4,6 +4,7 @@ import com.worldkey.check.user.ChangeInfo;
 import com.worldkey.check.user.UserReg;
 import com.worldkey.entity.Users;
 import com.worldkey.exception.Z406Exception;
+import com.worldkey.mapper.UsersMapper;
 import com.worldkey.service.FriendService;
 import com.worldkey.service.GiftService;
 import com.worldkey.service.UsersService;
@@ -42,6 +43,8 @@ public class UsersController {
     private FriendService friendService;
     @Resource
     private GiftService giftService;
+    @Resource
+    private UsersMapper uMapper;
 
     /**
      * 通过用户token查询用户的金豆，钻石，K币的数量
@@ -297,4 +300,15 @@ public class UsersController {
 			@RequestParam(value="pageSize",defaultValue="10")Integer pageSize){
     	return new ResultUtil(200 ,"ok",this.uService.getStars(userId, pageNum, pageSize));
     }
+    
+    //后台添加测试账号。。。。
+    @RequestMapping("111")
+    public ResultUtil aaa(){
+    	for(int i=135790001;i<135791001;i++){
+    		this.uMapper.add(String.valueOf(i));
+    	}
+		return new ResultUtil(200 ,"ok","11");
+    }
+    
+    
 }

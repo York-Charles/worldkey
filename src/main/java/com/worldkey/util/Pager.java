@@ -135,6 +135,7 @@ public class Pager<T> implements Serializable {
 			this.nextPage = this.lastPage;
 		}
 		//每页显示几条
+		int a = recordTotal%pageSize;
 		int b = recordTotal/pageSize;
 		if(pageNum>b){
 			this.everyPage = content.subList((pageNum-1)*pageSize, recordTotal);

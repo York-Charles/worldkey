@@ -12,9 +12,12 @@ public interface CoffeeBarMapper {
 	@Select("select id from coffee_bar")
 	List<Integer> getCid();
 	
-	@Insert("Insert into coffee_bar values (null,now(),ceiling(rand()*(select count(id) from coffee_scene)))")
-	Integer addCoffeeHome();
-	
+	@Insert("Insert into coffee_bar values (null,now(),#{scene})")
+	Integer addCoffeeHome(Integer scene);
+
+	@Select("select scene from coffee_bar  group by scene order by count(scene) desc limit 1")
+	Integer truncScene();
+
 	@Select("select Max(id) from coffee_bar")
 	Integer newCoffeeBar();
 	
@@ -28,4 +31,8 @@ public interface CoffeeBarMapper {
 	
 	@Delete("delete from coffee_bar where id=#{barId}")
 	Integer removeBar(Integer barId);
+
+	@Select("select scene_name from coffee_scene " +
+			"inner join coffee_bar as c on c.scene=coffee_scene.id where c.id=#{barId}")
+	String getBarName(Integer barId);
 }

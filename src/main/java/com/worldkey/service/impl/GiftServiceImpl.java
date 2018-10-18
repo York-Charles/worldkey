@@ -85,6 +85,7 @@ public class GiftServiceImpl extends ServiceImpl<GiftMapper, Gift> implements Gi
 		if (info == null) {
 			return 0;
 		}
+		if(!(a1.equals(users.getId()))){
 		Users jdAndZsAndKb = usersService.getJdAndZsAndKb(users.getId());
 		// 判断是否是金豆礼物
 		boolean jdPrice = gift.getJdPrice() != null && gift.getJdPrice() > 0;
@@ -151,6 +152,9 @@ public class GiftServiceImpl extends ServiceImpl<GiftMapper, Gift> implements Gi
 			GiftRecord giftRecord = new GiftRecord(new Date(), users.getId(), toInformation, giftId);
 			boolean insert = giftRecordService.insert(giftRecord);
 			return insert ? 3 : 4;
+		}
+		}else if(a1.equals(users.getId())){
+			return 6;
 		}
 		// 余额不足返回2
 		return 2;

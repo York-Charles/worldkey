@@ -24,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -73,16 +75,74 @@ public class CommentServiceImpl implements CommentService {
         return new PageInfo<>(comments);
     }
     @Override
-    public PageInfo<Comment> selectByInformationOrderByIdDesc1(Long information, Integer pageNum, Integer pageSize) {
+    public PageInfo<Comment> selectByInformationOrderByIdDesc1(Long information, Integer pageNum, Integer pageSize,String token) {
         PageHelper.startPage(pageNum, pageSize, true);
         List<Comment> comments = this.commentMapper.selectByInformationOrderByIdDesc1(information);
-        return new PageInfo<>(comments);
+        PageInfo<Comment> pageInfo = new PageInfo<>(comments);
+        for(Comment c:comments){
+        	Date s = this.commentMapper.s();
+        	SimpleDateFormat dfss = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datesss = dfss.format(s);
+        	String ss = datesss.substring(0,3);
+        	
+        	Date days = c.getGmtCreate();
+        	SimpleDateFormat dfs = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datess = dfs.format(days);
+        	String sss = datess.substring(0,3);
+        	
+        	if(ss.equals(sss)){
+        		c.setJudge(1);
+        	}
+        	List<Comment> comments1 = this.commentMapper.selectByCommentsPraise(c.getCommentId());
+        	c.setList(comments1);
+        	c.setSize(comments.indexOf(c));
+        	if(c.getPraiseNum()==null){
+        		c.setPraiseNum(0);
+        	}
+        	c.setPages(pageInfo.getPages());
+        	//判断点赞 0为点赞  1点赞
+    		if(token!=null){
+    			Users user = usersService.findByToken(token);
+    			Integer i = this.commentMapper.status(user.getId(), c.getCommentId());
+    			c.setStatus(i);
+    		}
+        }  
+        return pageInfo;
     }
     @Override
-    public PageInfo<Comment> selectByInformationOrderByIdDesc2(Long information, Integer pageNum, Integer pageSize) {
+    public PageInfo<Comment> selectByInformationOrderByIdDesc2(Long information, Integer pageNum, Integer pageSize,String token) {
         PageHelper.startPage(pageNum, pageSize, true);
         List<Comment> comments = this.commentMapper.selectByInformationOrderByIdDesc2(information);
-        return new PageInfo<>(comments);
+        PageInfo<Comment> pageInfo = new PageInfo<>(comments);
+        for(Comment c:comments){
+        	Date s = this.commentMapper.s();
+        	SimpleDateFormat dfss = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datesss = dfss.format(s);
+        	String ss = datesss.substring(0,3);
+        	
+        	Date days = c.getGmtCreate();
+        	SimpleDateFormat dfs = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datess = dfs.format(days);
+        	String sss = datess.substring(0,3);
+        	
+        	if(ss.equals(sss)){
+        		c.setJudge(1);
+        	}
+        	List<Comment> comments1 = this.commentMapper.selectByCommentsPraise(c.getCommentId());
+        	c.setList(comments1);
+        	c.setSize(comments.indexOf(c));
+        	if(c.getPraiseNum()==null){
+        		c.setPraiseNum(0);
+        	}
+        	c.setPages(pageInfo.getPages());
+        	//判断点赞 0为点赞  1点赞
+    		if(token!=null){
+    			Users user = usersService.findByToken(token);
+    			Integer i = this.commentMapper.status(user.getId(), c.getCommentId());
+    			c.setStatus(i);
+    		}
+        }   
+        return pageInfo;
     }
 
     @Override
@@ -140,6 +200,8 @@ public class CommentServiceImpl implements CommentService {
         comment.setUsers(user);
         //设置为评论的回复
         comment.setType(Byte.valueOf("2"));
+        Long a = this.commentMapper.comment(comment.getComment());
+        this.commentMapper.addReplyCount(a);
         this.commentMapper.addReplyCount(comment.getComment());
         Set<String> keys = redisTemplate.keys("comment" + comment1.getInformation()+ "-*");
         keys.addAll(redisTemplate.keys("getReplyComment" + comment.getComment() + ",*"));
@@ -150,7 +212,6 @@ public class CommentServiceImpl implements CommentService {
     
 
     @Override
-    @Cacheable(value ="getReply",key = "'getReplyComment'+#comment+','+#pageNum+','+#pageSize")
     public PageInfo<Comment> getReply(Long comment, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum,pageSize);
         List<Comment>list=this.commentMapper.selectByComment(comment);
@@ -162,6 +223,79 @@ public class CommentServiceImpl implements CommentService {
         PageHelper.startPage(pageNum,pageSize);
         List<Comment>list=this.commentMapper.selectByComment1(comment);
         return new PageInfo<>(list);
+    }
+    
+    @Override
+    public PageInfo<Comment> getReplyTime(Long comment, Integer pageNum, Integer pageSize,String token) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<Comment>list=this.commentMapper.getReplyTime(comment);
+        PageInfo<Comment> pageInfo = new PageInfo<>(list);
+        for(Comment c:list){
+        	Date s = this.commentMapper.s();
+        	SimpleDateFormat dfss = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datesss = dfss.format(s);
+        	String ss = datesss.substring(0,3);
+        	
+        	Date days = c.getGmtCreate();
+        	SimpleDateFormat dfs = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datess = dfs.format(days);
+        	String sss = datess.substring(0,3);
+        	
+        	if(ss.equals(sss)){
+        		c.setJudge(1);
+        	}
+        	if(c.getPraiseNum()==null){
+        		c.setPraiseNum(0);       		
+        	}
+        	c.setSize(list.indexOf(c));
+        	c.setPages(pageInfo.getPages());
+        	Comment cc = this.commentMapper.selectByPrimaryKey(comment);
+        		c.setToUserId(cc.getUsers().getId());
+        		//判断点赞 0为点赞  1点赞
+        		if(token!=null){
+        			Users user = usersService.findByToken(token);
+        			Integer i = this.commentMapper.status(user.getId(), c.getCommentId());
+        			c.setStatus(i);
+        		}
+        }
+        return pageInfo;
+    }
+    
+    @Override
+    public PageInfo<Comment> getReplyPraise(Long comment, Integer pageNum, Integer pageSize,String token) {
+        PageHelper.startPage(pageNum,pageSize);
+        List<Comment>list=this.commentMapper.getReplyPraise(comment);
+        PageInfo<Comment> pageInfo = new PageInfo<>(list);
+        for(Comment c:list){
+        	Date s = this.commentMapper.s();
+        	SimpleDateFormat dfss = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datesss = dfss.format(s);
+        	String ss = datesss.substring(0,3);
+        	
+        	Date days = c.getGmtCreate();
+        	SimpleDateFormat dfs = new SimpleDateFormat("yy年MM月dd日 HH:mm"); 
+            String datess = dfs.format(days);
+        	String sss = datess.substring(0,3);
+        	
+        	if(ss.equals(sss)){
+        		c.setJudge(1);
+        	}
+        	
+        	if(c.getPraiseNum()==null){
+        		c.setPraiseNum(0);
+        	}
+        	c.setSize(list.indexOf(c));
+        	c.setPages(pageInfo.getPages());
+    		Comment cc = this.commentMapper.selectByPrimaryKey(comment);
+    		c.setToUserId(cc.getUsers().getId());
+    		//判断点赞 0为点赞  1点赞
+    		if(token!=null){
+    			Users user = usersService.findByToken(token);
+    			Integer i = this.commentMapper.status(user.getId(), c.getCommentId());
+    			c.setStatus(i);
+    		}
+        }
+        return pageInfo;
     }
 
     @Override

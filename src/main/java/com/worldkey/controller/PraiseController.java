@@ -7,6 +7,7 @@ import com.worldkey.entity.History;
 import com.worldkey.entity.InformationAll;
 import com.worldkey.entity.Praise;
 import com.worldkey.entity.PraiseApp;
+import com.worldkey.entity.PraiseCommentNum;
 import com.worldkey.entity.PraiseNum;
 import com.worldkey.entity.Users;
 import com.worldkey.exception.Z406Exception;
@@ -14,6 +15,7 @@ import com.worldkey.jdpush.Jdpush;
 import com.worldkey.mapper.CommentMapper;
 import com.worldkey.mapper.HistoryMapper;
 import com.worldkey.mapper.InformationAllMapper;
+import com.worldkey.mapper.PraiseCommentNumMapper;
 import com.worldkey.mapper.PraiseNumMapper;
 import com.worldkey.service.CommentService;
 import com.worldkey.service.PraiseService;
@@ -46,9 +48,11 @@ public class PraiseController {
 	private PraiseService praiseService;
 	private UsersService usersService;
 	private PraiseNumMapper praiseNumMapper;
+	private PraiseCommentNumMapper praiseCommentNumMapper;
 	private InformationAllMapper informationAllMapper;
 	private CommentService commentService;
 	private HistoryMapper hMapper;
+	private CommentMapper commentMapper;
 	private boolean flag = true;
 
 	/**
@@ -97,9 +101,11 @@ public class PraiseController {
 				}
 			}
 				flag = false;
-				return new ResultUtil(200, "ok", "执行点赞");
+				Integer p =this.praiseNumMapper.p(informationId);
+				return new ResultUtil(200, "Y", p);
 		}
-		return new ResultUtil(200, "no", "取消点赞");
+		Integer pp =this.praiseNumMapper.p(informationId);
+		return new ResultUtil(200, "N", pp);
 	}
 	
 	@RequestMapping("addCommentPraise")
@@ -134,20 +140,38 @@ public class PraiseController {
 		h.setPetName(uId.getPetName());
 		h.setUserId(uId.getId());
 		h.setUserName(uId.getLoginName());
-		h.setCommentInfo(comment.getInfo());
+		h.setCommentInfo(comment.getInfo()); //点赞的评论
 		h.setClassify(6);
-		this.hMapper.aaa(h);
+		if(comment.getComment()!=null){
+		Comment comment1 = commentService.selectByPrimaryKey(comment.getComment());
+		h.setACommentInfo(comment1.getInfo()); //点赞评论的评论
+		h.setToCommentId(Integer.parseInt(comment1.getCommentId()+""));
+		h.setToPetName(comment1.getUsers().getPetName());
+		Integer iii = this.praiseCommentNumMapper.selectPraiseNum(Integer.parseInt(comment1.getCommentId()+""));
+		if(iii!=null){
+		h.setPraiseNum(iii);
+		}
+		Date day1 = comment1.getGmtCreate();
+		SimpleDateFormat dff = new SimpleDateFormat("MM月dd日 HH:mm");
+		String date1 = dff.format(day1);
+		h.setCommentCreateTime(date1);	
+		Integer aaa=this.commentMapper.status(uId.getId(),comment1.getCommentId());
+		h.setStatus(aaa);
+		}
 		int a = this.praiseService.addCommentPraise(token, commentId);
 		if (a == 1) {
 			if (flag == true) {
+				this.hMapper.aaa(h);
 				if (!(uId.getId().equals(a1))) {
 					Jdpush.jpushAndriod6(uId.getPetName(), s,s1, map);
 				}
 			}
 				flag = false;
-				return new ResultUtil(200, "ok", "执行点赞");
+				int i = this.praiseCommentNumMapper.selectPraiseNum(commentId);
+				return new ResultUtil(200, "Y", i);
 		}
-		return new ResultUtil(200, "no", "取消点赞");
+		int ii = this.praiseCommentNumMapper.selectPraiseNum(commentId);
+		return new ResultUtil(200, "N", ii);
 	}
 
 	/**
@@ -217,6 +241,14 @@ public class PraiseController {
 	@Autowired
 	public void setHistoryMapper(HistoryMapper hMapper){
 		this.hMapper = hMapper;
+	}
+	@Autowired
+	public void setPraiseCommentNumMapper(PraiseCommentNumMapper praiseCommentNumMapper){
+		this.praiseCommentNumMapper = praiseCommentNumMapper;
+	}
+	@Autowired
+	public void setCommentMapper(CommentMapper commentMapper){
+		this.commentMapper = commentMapper;
 	}
 	
 	/**5.19

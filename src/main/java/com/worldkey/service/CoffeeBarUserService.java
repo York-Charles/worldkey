@@ -11,14 +11,9 @@ import com.worldkey.util.ResultUtil;
 public interface CoffeeBarUserService {
 	
 	ResultUtil matchingState(Integer userId,Integer state);
-	Integer matchingState1(Integer userId,Integer state);
 	Map<String,Object> putSeat(Integer userId);
-	
 	Map<String,Object> leaving(Integer userId);
-	
 	Map<String,Object> accepted(Integer userId);
-	
-	List<Integer> getUsersByBarIdAndRoomId(Integer barId,Integer sceneId);
 	
 	CoffeeBarUser getByUserId(Integer userId);
 	
@@ -29,4 +24,6 @@ public interface CoffeeBarUserService {
 	String getHeadIcon(Integer seatId,Integer barId);
 	
 	PrivateRequest infoFromBoth(Users user,Users user1);
+
+	Map<String,Object> WeggenNachrichten(Integer userId);
 }

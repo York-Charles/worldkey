@@ -20,8 +20,8 @@ public interface CommentService {
     Comment selectByPrimaryKey(Long commentId);
 
     PageInfo<Comment> selectByInformationOrderByIdDesc(Long id, Integer pageNum, Integer pageSize);
-    PageInfo<Comment> selectByInformationOrderByIdDesc1(Long id, Integer pageNum, Integer pageSize);
-    PageInfo<Comment> selectByInformationOrderByIdDesc2(Long id, Integer pageNum, Integer pageSize);
+    PageInfo<Comment> selectByInformationOrderByIdDesc1(Long id, Integer pageNum, Integer pageSize,String token);
+    PageInfo<Comment> selectByInformationOrderByIdDesc2(Long id, Integer pageNum, Integer pageSize,String token);
 
     /**
      * 添加回复
@@ -33,6 +33,10 @@ public interface CommentService {
     PageInfo getReply(Long comment, Integer pageNum, Integer pageSize);
     
     PageInfo getReply1(Long comment, Integer pageNum, Integer pageSize);
+    
+    PageInfo getReplyTime(Long comment, Integer pageNum, Integer pageSize,String token);
+    
+    PageInfo getReplyPraise(Long comment, Integer pageNum, Integer pageSize,String token);
     
     
     //5.18根据ID查找所有文章的所有操作

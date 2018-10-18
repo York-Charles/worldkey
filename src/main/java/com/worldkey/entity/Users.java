@@ -109,8 +109,4 @@ public class Users implements Serializable {
     	this.bgImg = bgImg;
     	this.bgContent = bgContent;
     }
-    
-    public Users(Long userId){
-    	this.id=userId;
-    }
 }

@@ -8,6 +8,7 @@ import java.util.Random;
 
 import javax.annotation.Resource;
 
+import com.worldkey.service.FriendService;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -42,11 +43,8 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 	@Resource
 	ReqRecordMapper rrm;
 	@Resource
-	DissRecordMapper drm;
+    FriendService fs;
 
-	public static final String REQUEST = "Request";
-	public static final String ACCEPT = "AcceptResponse";
-	public static final String REJECT = "RejectResponse";
 
 	@SuppressWarnings("serial")
 	private Map<String, Object> havenUsed(List<Integer> havenSeated, List<String> havenUsed, Integer sex) {
@@ -80,7 +78,7 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 			}
 		};
 		List<String> appell = null;
-		if (sex == 0) {
+		if (sex == 1) {
 			appell = appellation.subList(0, 5);
 		} else {
 			appell = appellation.subList(5, 10);
@@ -125,22 +123,26 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 	private void initBar(List<Integer> Cid) {
 		List<CoffeeBarUser> cbu = this.cbum.getAll();
 		// 人数与咖啡厅比率大于4时，自动创建一个咖啡厅房间
-		if (cbu.size() / Cid.size() == 4) {
-			this.cbm.addCoffeeHome();
+		if (cbu.size() / Cid.size() > 4) {
+            Integer scene = this.cbm.truncScene();
+            List<Integer> list = new ArrayList<Integer>(){{add(1);add(2);add(3);}};
+            list.remove(scene);
+            this.cbm.addCoffeeHome(list.get(new Random().nextInt(list.size())));
 		}
 	}
 
 	private void delBar(List<Integer> Cid) {
 		List<CoffeeBarUser> cbu = this.cbum.getAll();
 		if (cbu.size() / Cid.size() <= 5) {
-			if (Cid.size() > 2) {
-				for (Integer i : Cid) {
-					if (this.cbum.selectUsers(i).equals(0)) {
-						this.cbm.removeBar(i);
-					}
-				}
+                if(Cid.size()>1) {
+                    for (Integer i : Cid) {
+                        if (this.cbum.selectUsers(i).equals(0)) {
+                            this.cbm.removeBar(i);
+                        }
+                    }
+                }
+            log.info("我已经走过删除方法了！！！");
 			}
-		}
 	}
 
 	@Override
@@ -154,6 +156,8 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		delBar(Cid);
 		List<ReqRecord> record = this.rrm.selectByBarId(s.getBarId());
 		map.put("requestList", record);
+		map.put("label",this.cbum.selectLabelByUserId1(userId));
+		map.put("channelName",this.cbm.getBarName(this.cbum.selectBarIdByUserId1(userId)));
 		if (this.rrm.selectByIsReqId(Long.parseLong(userId + "")) != null) {
 			this.cbum.leaving(userId);
 			this.rrm.delRecord1(userId);
@@ -164,11 +168,6 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		}
 		this.cbum.leaving(userId);
 		return map;
-	}
-
-	@Override
-	public List<Integer> getUsersByBarIdAndRoomId(Integer barId, Integer sceneId) {
-		return this.um.getUsersByBarIdAndRoomId(barId, sceneId);
 	}
 
 	@Override
@@ -191,16 +190,19 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public ResultUtil matchingState(Integer userId, Integer state) {
-		if (this.cbum.selectExist(userId) != null && state == 0) {
-			return new ResultUtil(500, "error", "已在匹配中请稍候");
-		}
+
 		Users user = this.um.selectByPrimaryKey(Long.parseLong(userId + ""));
 		// 所有咖啡厅
 		List<Integer> Cid = this.cbm.getCid();
 		eligibleBar(Cid, user.getSex(), userId, state);
 		if (Cid.size() == 0) {
-			return new ResultUtil(500, "error", "当前没有合适房间");
-		}
+            Integer scene = this.cbm.truncScene();
+            List<Integer> list = new ArrayList<Integer>(){{add(1);add(2);add(3);}};
+            list.remove(scene);
+			this.cbm.addCoffeeHome(list.get(new Random().nextInt(list.size())));
+            Integer i = this.cbm.newCoffeeBar();
+            Cid.add(i);
+        }
 		Random r = new Random();
 		Integer coffeeId = Cid.get(r.nextInt(Cid.size()));
 		Map<String, Object> map = havenUsed(this.cbum.selectSeated(coffeeId), this.cbum.selectedUsed(coffeeId),
@@ -209,12 +211,22 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		List<Integer> havenSeated = (List<Integer>) map.get("seat");
 		String label = havenUsed.get(r.nextInt(havenUsed.size()));
 		Integer s = havenSeated.get(r.nextInt(havenSeated.size()));
+		List<String> allUsers = this.cbum.selectUserIdByBarId(coffeeId);
 		if (state == 0) {
-			this.cbum.matchingState(userId, coffeeId, s, label);
+            if (this.cbum.selectExist(userId) != null) {
+                this.cbum.Changing(userId, coffeeId, s, label);
+            }else{
+                this.cbum.matchingState(userId, coffeeId, s, label);
+            }
 			initBar(Cid);
 		} else {
 			this.cbum.changingRoom(userId, coffeeId, s, label);
+			delBar(Cid);
 		}
+        String[] ss = new String[allUsers.size()];
+        String[] array = allUsers.toArray(ss);
+		this.fs.barrage(user.getLoginName(),this.cbum.selectLabelByUserId(user.getId().toString())+"进入了"
+                        +this.cbm.getBarName(coffeeId), null,FriendServiceImpl.NOTICE,array);
 		List<CoffeeBarUser> c = this.cbum.selectByBarId(coffeeId);
 		for (CoffeeBarUser cb : c) {
 			if (cb.getUserId().equals(userId)) {
@@ -228,48 +240,6 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		return new ResultUtil(200, "ok", map1);
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public Integer matchingState1(Integer userId, Integer state) {
-		if (this.cbum.selectExist(userId) != null && state == 0) {
-			return 0;
-		}
-		Users user = this.um.selectByPrimaryKey(Long.parseLong(userId + ""));
-		// 所有咖啡厅
-		List<Integer> Cid = this.cbm.getCid();
-		eligibleBar(Cid, user.getSex(), userId, state);
-		if (Cid.size() == 0) {
-			return 1;
-		}
-		Random r = new Random();
-		Integer coffeeId = Cid.get(r.nextInt(Cid.size()));
-		Map<String, Object> map = havenUsed(this.cbum.selectSeated(coffeeId), this.cbum.selectedUsed(coffeeId),
-				user.getSex());
-		List<String> havenUsed = (List<String>) map.get("appell");
-		List<Integer> havenSeated = (List<Integer>) map.get("seat");
-		String label = havenUsed.get(r.nextInt(havenUsed.size()));
-		Integer s = havenSeated.get(r.nextInt(havenSeated.size()));
-		if (state == 0) {
-			this.cbum.matchingState(userId, coffeeId, s, label);
-			initBar(Cid);
-		} else {
-			this.cbum.changingRoom(userId, coffeeId, s, label);
-		}
-		List<CoffeeBarUser> c = this.cbum.selectByBarId(coffeeId);
-		for (CoffeeBarUser cb : c) {
-			if (cb.getUserId().equals(userId)) {
-				cb.setIsOwn(1);
-			}
-		}
-		log.info(coffeeId + ">>>>>>>>>>>>>>>>>>>>>>>>.");
-		// Map<String, Object> map1 = new HashMap<String, Object>();
-		// map1.put("list", c);
-		// map1.put("scene", this.cbm.selectScene(coffeeId));
-		// map1.put("bar", "bar" + coffeeId);
-		CoffeeBarUser ss = this.cbum.selectByUserId(userId);
-		return ss.getSeat();
-	}
-
 	@Override
 	@CachePut(value = "seatId", key = "#userId+'in'")
 	public Map<String, Object> putSeat(Integer userId) {
@@ -278,6 +248,8 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		map.put("seat", s.getSeat());
 		List<ReqRecord> record = this.rrm.selectByBarId(s.getBarId());
 		map.put("requestList", record);
+        map.put("label",this.cbum.selectLabelByUserId1(userId));
+        map.put("channelName",this.cbm.getBarName(this.cbum.selectBarIdByUserId1(userId)));
 		return map;
 	}
 
@@ -289,7 +261,7 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		map.put("seat", s.getSeat());
 		List<ReqRecord> record = this.rrm.selectByBarId1(s.getBarId());
 		map.put("requestList", record);
-		log.info(map.toString() + ">>>>>>>>>>>>>>>>>>>>>>>>");
+        map.put("label",this.cbum.selectLabelByUserId1(userId));
 		return map;
 	}
 
@@ -305,5 +277,11 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 		pr.setMessage(2);
 		return pr;
 	}
+
+    @Override
+    @Cacheable(value = "channel", key = "#userId+'inchannel'")
+    public Map<String, Object> WeggenNachrichten(Integer userId) {
+        return null;
+    }
 
 }

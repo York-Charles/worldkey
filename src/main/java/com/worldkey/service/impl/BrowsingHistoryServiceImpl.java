@@ -88,6 +88,12 @@ public class BrowsingHistoryServiceImpl implements BrowsingHistoryService {
         int infoPageNum=pageNum-items.size()/10;
         PageHelper.startPage(infoPageNum,pageSize);
         List<BaseShow>list=this.allService.findOrderByPointNumber1();
+        if(userID!=null){
+	        for(BaseShow l:list){
+	        	Integer i = this.praiseMapper.i(userID,l.getId());
+	        	l.setStatus(i);
+	        }
+        }
         List<BaseShow> commentNum = informationAllMapper.selectCommentNum();
         if(userID!=null){
         	

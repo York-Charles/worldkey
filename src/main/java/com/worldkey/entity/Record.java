@@ -11,6 +11,7 @@ public class Record {
 	private String userId;
 	private String message;
 	private Date createTime;
+	private Integer type;
 	
 	private String petName;
 	private String loginName;

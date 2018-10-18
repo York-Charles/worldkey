@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.http.util.TextUtils;
 import org.apache.jasper.compiler.JspConfig;
+import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.worldkey.entity.InformationAll;
 import com.worldkey.entity.Users;
@@ -26,7 +27,6 @@ import cn.jpush.api.push.model.PushPayload;
 import cn.jpush.api.push.model.audience.Audience;
 import cn.jpush.api.push.model.notification.AndroidNotification;
 import cn.jpush.api.push.model.notification.Notification;
-
 
 
 public class Jdpush {

@@ -2,9 +2,11 @@ package com.worldkey.entity;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
+import lombok.Data;
+
 import java.io.Serializable;
 import java.util.Date;
-
+@Data
 public class FriendExample implements Serializable {
 	private Integer sex;
 	@DateTimeFormat(pattern="yyyy-MM-dd")
@@ -19,9 +21,12 @@ public class FriendExample implements Serializable {
 	private String usersname;
 	private String note;
 	private String usersId;
+	private String signature;
+	
+	private Long userId;
 
 	public FriendExample(Integer sex, Date birthday, String headImg, String telNum, String email, Date createDate,
-			String usersname, String note, String usersId) {
+			String usersname, String note, String usersId,String signature) {
 		super();
 		this.sex = sex;
 		this.birthday = birthday;
@@ -32,6 +37,15 @@ public class FriendExample implements Serializable {
 		this.usersname = usersname;
 		this.note = note;
 		this.usersId = usersId;
+		this.signature = signature;
+	}
+
+	public String getSignature() {
+		return signature;
+	}
+
+	public void setSignature(String signature) {
+		this.signature = signature;
 	}
 
 	public FriendExample() {

@@ -59,9 +59,10 @@ public class ShiroConfig {
 		filterChainDefinitionMap.put("/informationall/find/**", "anon");//表示可以匿名访问
 		filterChainDefinitionMap.put("/informationall/giftRecord/**", "anon");//表示可以匿名访问
 		filterChainDefinitionMap.put("/informationall/info/**", "anon");//表示可以匿名访问
-		filterChainDefinitionMap.put("/informationall/info1/**", "anon");//表示可以匿名访问
 		filterChainDefinitionMap.put("/informationall/find/**", "anon");//表示可以匿名访问
+		filterChainDefinitionMap.put("/informationall/find1/**", "anon");//表示可以匿名访问
 		filterChainDefinitionMap.put("/informationall/tuijian", "anon");//表示可以匿名访问
+		filterChainDefinitionMap.put("/informationall/findStick/**", "anon");
 		filterChainDefinitionMap.put("/admin/logout**", "authc");//表示需要认证才可以访问
 		filterChainDefinitionMap.put("/type/one/del/**", "authc");//表示需要认证才可以访问
 		filterChainDefinitionMap.put("/type/one/update/**", "authc");//表示需要认证才可以访问
@@ -80,6 +81,8 @@ public class ShiroConfig {
 		filterChainDefinitionMap.put("/*", "anon");
 		filterChainDefinitionMap.put("/**", "anon");
 		filterChainDefinitionMap.put("/*.*", "anon");
+		
+		
 		//设置过滤器链
 		shiroFilterFactoryBean.setLoginUrl("/users/login");
 		shiroFilterFactoryBean.setSuccessUrl("/manage");

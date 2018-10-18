@@ -13,6 +13,7 @@ public class CustomizeBroadcastMessage extends BaseMessage {
 	private CoffeeBarUser requestedUser;
 	private String content;
 	private String icon;
+	private String iconRot;
 	private Map<Integer, Integer> map = null;
 	private transient static final String TYPE = "DB:broadcastRequest";
 
@@ -20,6 +21,14 @@ public class CustomizeBroadcastMessage extends BaseMessage {
 		super();
 		this.requestingUser = requestingUser;
 		this.requestedUser = requestedUser;
+	}
+
+	public String getIconRot() {
+		return iconRot;
+	}
+
+	public void setIconRot(String iconRot) {
+		this.iconRot = iconRot;
 	}
 
 	public String getIcon() {

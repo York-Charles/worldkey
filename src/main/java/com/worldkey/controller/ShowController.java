@@ -60,7 +60,7 @@ public class ShowController {
 	@RequestMapping("manageList")
 	public ModelAndView list(@RequestParam(defaultValue = "1") Integer page,
 			@RequestParam(defaultValue = "10") Integer pageSize, Integer oneType, Integer twoType, Integer threeType,
-			@RequestParam(defaultValue = "") String q) {
+			@RequestParam(defaultValue = "") String q,@RequestHeader("host") String host) {
 		ModelAndView model = new ModelAndView("show/list");
 		model.addObject("q", q);
 		// 4.19
@@ -78,7 +78,7 @@ public class ShowController {
 
 		if (oneType != null) {
 			PageHelper.startPage(page, pageSize);
-			List<Show> list = this.informationAllService.findShowByOneTypeAll(oneType, q);
+			List<Show> list = this.informationAllService.findShowByOneTypeAll(oneType, q,host);
 			PageInfo<Show> pageInfo = new PageInfo<>(list);
 			model.addObject("pageInfo", pageInfo);
 			// 查询的一级分类
@@ -106,7 +106,7 @@ public class ShowController {
 			PageHelper.startPage(page, pageSize);
 			List<Show> list3 = this.informationAllService.findShowByTwoTypeAll(twoType);
 			// 4.18
-			List<Show> list = this.informationAllService.findShowByThreeTypeAll(threeType);
+			List<Show> list = this.informationAllService.findShowByThreeTypeAll(threeType,host);
 			PageInfo<Show> pageInfo = new PageInfo<>(list);
 			model.addObject("pageInfo", pageInfo);
 			log.debug(pageInfo.getList().toString());
@@ -141,6 +141,7 @@ public class ShowController {
 		}
 		InformationAll informationAll = new InformationAll(title, titleImgs, threeType.getId(), user.getPetName(), 0,
 					user, 4, info);
+		informationAll.setStick(0);
 		String add = this.informationAllService.add1(informationAll, host);
 		// 发布成功
 		if (add != null) {
@@ -168,6 +169,7 @@ public class ShowController {
 		InformationAll informationAll = new InformationAll(title, titleImgs, threeType.getId(), user.getPetName(), 0,
 					user, 4, info,1);
 		informationAll.setUserBrand(1);
+		informationAll.setStick(0);
 		String add = this.informationAllService.add1(informationAll, host);
 		// 发布成功
 		if (add != null) {
@@ -248,6 +250,11 @@ public class ShowController {
 		info.setTitle(title);
 		ThreeType threeType = threeTypeService.findByTypeName(typeName);
 		info.setType(threeType.getId());
+		info.setStick(0);
+		if(threeType.getId()==10468||threeType.getId()==10463){
+			info.setSolve(1);
+		}
+		
 		this.informationAllService.addShuoContent(info);
 		return new ResultUtil(200, "ok", info.getId());
 	}

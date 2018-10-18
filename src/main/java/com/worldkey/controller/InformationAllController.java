@@ -8,6 +8,7 @@ import com.worldkey.entity.Praise;
 import com.worldkey.entity.ThreeType;
 import com.worldkey.entity.TwoType;
 import com.worldkey.entity.Users;
+import com.worldkey.mapper.InformationAllMapper;
 import com.worldkey.service.*;
 import com.worldkey.util.ResultUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -26,10 +27,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-@RestController
+@Controller
 @RequestMapping("informationall")
 @Slf4j
 public class InformationAllController {
@@ -48,6 +50,8 @@ public class InformationAllController {
     private BrowsingHistoryService browsingHistoryService;
     @Resource
     private ShareInfoRecordService shareInfoRecordService;
+    @Resource
+    private InformationAllMapper informationAllMapper;
 
 
     @RequestMapping(value = "ajaxUpdate", method = RequestMethod.POST)
@@ -141,6 +145,21 @@ public class InformationAllController {
         return new ResultUtil(200, "ok", this.allService.checked(vo));
 
     }
+    
+    /**
+     * bug反馈状态solve
+     */
+
+    @RequestMapping("solve")
+    @ResponseBody
+    @RequiresRoles("informationall")
+    public ResultUtil solve(@NotNull Integer solve, @NotNull Long id) {
+        InformationAll vo = new InformationAll();
+        vo.setSolve(solve);
+        vo.setId(id);
+        return new ResultUtil(200, "ok", this.allService.solve(vo));
+
+    }
 
     /**
      * 以点击量排序，获取全部
@@ -179,7 +198,7 @@ public class InformationAllController {
     public ModelAndView list(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
                              @RequestParam(value = "pagesize", defaultValue = "10") Integer pageSize,
                              InformationAll vo,
-                             @RequestParam(defaultValue = "1")Integer onetype,Integer twotype,@RequestParam(defaultValue = "10000")Integer threetype) {
+                             @RequestParam(defaultValue = "1")Integer onetype,Integer twotype,@RequestParam(defaultValue = "10000")Integer threetype,@RequestHeader("host") String host) {
         ModelAndView model = new ModelAndView("informationall/list");
         if (threetype != null && threetype == 0) {
             vo.setType(threetype);
@@ -191,11 +210,11 @@ public class InformationAllController {
         if (vo.getType() == null) {
             vo.setType(onetype);
 //            page = this.allService.findByOneType(pageNum, pageSize, vo);
-            page = this.allService.findByType(pageNum, pageSize, threetype);
+            page = this.allService.findByType(pageNum, pageSize, threetype,host);
             model.addObject("pageinfo", page);
             vo.setType(null);
         } else {
-        	page = this.allService.findBySelective(pageNum, pageSize, vo);
+        	page = this.allService.findBySelective(pageNum, pageSize, vo,host);
             model.addObject("pageinfo",page);
         }
         model.addObject("onetype", onetype);
@@ -228,11 +247,22 @@ public class InformationAllController {
     @ResponseBody
     public ResultUtil findByType(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
                                  @RequestParam(value = "pagesize", defaultValue = "10") Integer pageSize,
-                                 @PathVariable Integer type) {
+                                 @PathVariable Integer type,@RequestHeader("host") String host) {
         InformationAll vo = new InformationAll();
         vo.setType(type);
         vo.setChecked(1);
-        return new ResultUtil(200, "ok", this.allService.findBySelective(pageNum, pageSize, vo));
+        return new ResultUtil(200, "ok", this.allService.findBySelective(pageNum, pageSize, vo,host));
+    }
+    
+    @RequestMapping("find1/{type}")
+    @ResponseBody
+    public ResultUtil findByType1(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
+                                 @RequestParam(value = "pagesize", defaultValue = "10") Integer pageSize,
+                                 @PathVariable Integer type,String token) {
+        InformationAll vo = new InformationAll();
+        vo.setType(type);
+        vo.setChecked(1);
+        return new ResultUtil(200, "ok", this.allService.findBySelective1(pageNum, pageSize, vo,token));
     }
 
     /**
@@ -316,6 +346,9 @@ public class InformationAllController {
         return model;
     }
     
+    /**
+     * 详情页
+     */
     @RequestMapping("info1/{id}")
     public ModelAndView info1(@PathVariable Long id, String token) {
         ModelAndView model = new ModelAndView("informationall/info1");
@@ -386,11 +419,37 @@ public class InformationAllController {
     
 	@RequestMapping("zhiding")
 	@ResponseBody
-	public ResultUtil zhiDing(Long id,@RequestHeader("host") String host) {
-		this.allService.zhiding(id,host);
+	public ResultUtil zhiDing(Long id) {
+		int i=this.informationAllMapper.selectStick(id);
+		if(i==1){
+			return new ResultUtil(200, "ok", "已置顶!");
+		}
+		this.allService.zhiding(id);
+		
 		return new ResultUtil(200, "ok", "置顶成功!");
 	}
 	
+	@RequestMapping("zhidingup")
+	@ResponseBody
+	public ResultUtil zhiDingup(Long id) {
+		int i=this.informationAllMapper.selectStick(id);
+		if(i==0){
+			return new ResultUtil(200, "ok", "未置顶!");
+		}
+		this.allService.zhidingup(id);
+		
+		return new ResultUtil(200, "ok", "取消置顶成功!");
+	}
+	
+	
+	 @RequestMapping("findStick")
+	 @ResponseBody
+	    public ResultUtil findStick(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
+	                                    @RequestParam(value = "pagesize", defaultValue = "10") Integer pageSize,
+	                                     Integer type,String token) {
+	        PageInfo<BaseShow> info = this.allService.findStick(pageNum, pageSize, type,token);
+	        return new ResultUtil(200, "ok", info);
+	    }
 	
 	
 }

@@ -14,10 +14,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>资讯</title>
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
     <script src="js/jquery-3.1.1.min.js"></script>
-    <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
     <title>资讯列表</title>
 </head>
 <body>
@@ -44,7 +44,7 @@
             </c:forEach>
         </select>
     </div>
-    
+  
     <div class="form-group">
         <label for="twotype" class="sr-only">2类型</label>
         <select name="twotype" id="twotype" class="form-control">
@@ -80,9 +80,11 @@
             <option value="3" <c:if test="${select.checked==3}">selected="selected" </c:if>>已下架</option>
         </select>
         </label></div>
+        
     <input type="hidden" name="page" value="${pageinfo.pageNum}" id="page">
     <input type="hidden" name="pagesize" value="${pageinfo.pageSize}" id="pagesize">
     <button class=" btn btn-sm btn-warning glyphicon glyphicon-search ">查询</button>
+      <input type="button" name="" class="but btn-sm btn-warning glyphicon glyphicon-search" onclick="location.href='javascript:history.go(-1)'" value="返回">
     <%--<a href="informationall/toadd" class="btn btn-sm btn-warning  glyphicon glyphicon-plus" target="new">添加</a>--%>
 </sf:form>
 <table id="tb" class="table table-hover text-center table-condensed">
@@ -93,7 +95,12 @@
       <!--  <th class="text-center">类型</th> -->  
         <th class="text-center">操作</th>
         <th class="text-center">审核</th>
-        <!-- <th class="text-center">置顶</th> -->
+        <c:forEach items="${threetypes}" var="c">
+             <c:if test="${c.id==10468||three.id==10463 }"> <th class="text-center">状态</th></c:if> 
+         </c:forEach>      
+          <c:forEach items="${twotypes}" var="c2">
+        <c:if test="${c2.id==225||c2.id==226 }"> <th class="text-center">置顶</th>  </c:if> 
+          </c:forEach>   
         <th class="text-center">链接</th>
     </tr>
     </thead>
@@ -102,10 +109,9 @@
         <c:if test="${c.checked!=2}">
             <tr>
                 <td>${co.count}</td>
-                <td><a href="${c.weburl}" target="new">${c.title}</a></td>
-      
+                <td width="30%"><a href="${c.weburl}" target="new">${c.title}</a></td>
                 <td>   
-             <!--    -->  <button id="${c.id}" class="compile btn-sm glyphicon glyphicon-edit btn btn-warning"></button>
+            		<button id="${c.id}" class="compile btn-sm glyphicon glyphicon-edit btn btn-warning"></button>
                     <button id="${c.id}" class="del btn-sm glyphicon glyphicon-trash btn btn-danger"></button>
                     <button type="button" data-id="${c.id}" class="change btn-sm  btn btn-warning" data-toggle="modal"
                             data-target="#typeChange">
@@ -114,7 +120,6 @@
                     <button data-id="${c.id}" type="button" class="move btn-sm  btn btn-warning" data-toggle="modal"
                         data-target="#move"><c:if test="${c.showPush!=0}"></c:if>精选
                 </button>
-          
                 </td>
                 <td>
                     <select id="${c.id}" class="checked form-control" title="">
@@ -139,10 +144,80 @@
 
                     </select>
                 </td>
-                <!--  <td>
-                	 <input type="button" data-id="${c.id}" class="btn btn-warning stick" value="置顶">   
+                <c:forEach items="${threetypes}" var="three"> 
+                <c:if test="${three.id==10468||three.id==10463 }">
+                <td>
+                    <select id="${c.id}" class="solve form-control" title="">
+                        <!-- 待处理 -->
+                        <c:if test="${c.solve==1}">
+                            <option value="1" selected="selected">待处理</option>
+                            <option value="2">已答复</option>
+                            <option value="3">处理中</option>
+                             <option value="4">请补充</option>
+                              <option value="5">已收录</option>
+                               <option value="6">已解决</option>
+                        </c:if>
+                        <!-- 已答复 -->
+                        <c:if test="${c.solve==2}">
+                            <option value="1">待处理</option>
+                            <option value="2"  selected="selected">已答复</option>
+                            <option value="3">处理中</option>
+                             <option value="4">请补充</option>
+                              <option value="5">已收录</option>
+                               <option value="6">已解决</option>
+                        </c:if>
+                         <!-- 处理中 -->
+                        <c:if test="${c.solve==3}">
+                            <option value="1">待处理</option>
+                            <option value="2" >已答复</option>
+                            <option value="3"  selected="selected">处理中</option>
+                             <option value="4">请补充</option>
+                              <option value="5">已收录</option>
+                               <option value="6">已解决</option>
+                        </c:if>
+                        <!-- 请补充 -->
+                        <c:if test="${c.solve==4}">
+                            <option value="1">待处理</option>
+                            <option value="2" >已答复</option>
+                            <option value="3"  >处理中</option>
+                             <option value="4" selected="selected">请补充</option>
+                              <option value="5">已收录</option>
+                               <option value="6">已解决</option>
+                        </c:if>
+                        <!-- 已收录 -->
+                        <c:if test="${c.solve==5}">
+                            <option value="1">待处理</option>
+                            <option value="2" >已答复</option>
+                            <option value="3"  >处理中</option>
+                             <option value="4">请补充</option>
+                              <option value="5" selected="selected">已收录</option>
+                               <option value="6">已解决</option>
+                        </c:if>
+                        <!-- 已收录 -->
+                        <c:if test="${c.solve==6}">
+                            <option value="1">待处理</option>
+                            <option value="2" >已答复</option>
+                            <option value="3"  >处理中</option>
+                             <option value="4">请补充</option>
+                              <option value="5">已收录</option>
+                               <option value="6"  selected="selected">已解决</option>
+                        </c:if>
+
+                    </select>
                 </td>
-                -->
+                </c:if>
+                </c:forEach>  
+                
+                
+                <c:forEach items="${twotypes}" var="c2">
+                 <c:if test="${c2.id==225||c2.id==226 }">
+                   <td>
+                 <input type="button" id="stick" data-id="${c.id}" class="btn btn-warning stick" value="置顶"  /> 
+                	  <input type="button" id="stickup" data-id="${c.id}" class="btn btn-warning stickup" value="取消"  />   
+                </td>
+                </c:if>
+                </c:forEach>
+                
                 <td>${c.weburl}</td>
             </tr>
         </c:if>
@@ -324,6 +399,26 @@
                 }
         	});
         });
+	
+	$('.stickup').click(function(){
+    	var id = $(this).data("id");
+    	$.ajax({
+    		url:"/informationall/zhidingup",
+    		type:'POST',
+    		async:'true',
+    		cache:"false",
+    		data:{id:id},
+    		success: function (data) {
+    			var code = data.code;
+    			if (code === 200) {
+    				alert(data.result);
+    				location.reload();
+    			}else{
+    				alert("未知错误!");
+    			}
+            }
+    	});
+    });
         
         $("#changeOneType").change(function () {
         	
@@ -355,6 +450,13 @@
         $(".checked").change(function () {
             var checked = $(this).val();
             $.post('<%=basePath%>informationall/checked?id=' + $(this).attr('id') + '&checked=' + checked, function (date) {
+                alert(date.msg);
+            })
+        });
+        
+        $(".solve").change(function () {
+            var solve = $(this).val();
+            $.post('<%=basePath%>informationall/solve?id=' + $(this).attr('id') + '&solve=' + solve, function (date) {
                 alert(date.msg);
             })
         });

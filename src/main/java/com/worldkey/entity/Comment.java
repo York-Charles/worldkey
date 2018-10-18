@@ -58,6 +58,20 @@ public class Comment implements Serializable {
     
     private Integer praiseNum;
     
+    private List<Comment> list;
+    
+    private String toPetName;
+    
+    private Long toUserId;
+    
+    private Integer pages;//当前页数
+    
+    private Integer  status;//点赞状态
+    
+    private Integer size;//角标
+    
+    private Integer judge;//判断是否为今年
+    
 
 
     public Comment() {

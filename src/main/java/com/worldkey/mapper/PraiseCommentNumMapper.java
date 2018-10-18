@@ -20,6 +20,8 @@ public interface PraiseCommentNumMapper {
     @Insert("insert into praise_comment_num (praise_num_id,comment,praise_num) VALUES (null,#{comment,jdbcType=INTEGER},#{praiseNum,jdbcType=INTEGER})")
     int insert(PraiseCommentNum record);
     
+    @Select("select praise_num from praise_comment_num where comment=#{commentId}")
+    int selectPraiseNum(Integer commentId);
 
 
 }

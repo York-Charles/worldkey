@@ -16,7 +16,7 @@ import java.util.Map;
 public interface InformationAllService {
     List<InformationAll> findByIds(List<Long> ids);
     PageInfo<InformationAll> findAll(Integer pageNum, Integer pageSize);
-    PageInfo<InformationAll> findByType(Integer pageNum, Integer pageSize, Integer type);
+    PageInfo<InformationAll> findByType(Integer pageNum, Integer pageSize, Integer type,String host);
     Integer add(InformationAll vo, String host);
     //说说
     
@@ -29,7 +29,9 @@ public interface InformationAllService {
     InformationAll update(Long id);
     InformationAll info(Long id);
     InformationAll info(Long id, Long userID);
-    PageInfo<InformationAll> findBySelective(Integer pageNum, Integer pageSize, InformationAll vo);
+    PageInfo<InformationAll> findBySelective(Integer pageNum, Integer pageSize, InformationAll vo,String host);
+    
+    PageInfo<BaseShow> findBySelective1(Integer pageNum, Integer pageSize, InformationAll vo,String token);
     int delById(Long id);
     PageInfo<InformationAll> findByOneType(Integer pageNum, Integer pageSize, InformationAll vo);
     PageInfo<InformationAll> usersFindBySelective(Integer pageNum, Integer pageSize, InformationAll vo);
@@ -42,6 +44,10 @@ public interface InformationAllService {
      * 3 ->已下架
      */
     int checked(InformationAll vo);
+    /**
+     * 修改bug反馈状态
+     */
+    int solve(InformationAll vo);
     InformationAllMapper getAllMapper();
 
 
@@ -69,7 +75,7 @@ public interface InformationAllService {
     List<BaseShow> findShowByTwoType(String twoTypeName, Long userId);
 
 
-    List<Show> findShowByOneTypeAll(Integer oneType, String word);
+    List<Show> findShowByOneTypeAll(Integer oneType, String word,String host);
     List<Show> findShowByTwoTypeAll(Integer twoType);
 
     Integer showPush(Long itemID, Integer type, String host);
@@ -80,13 +86,14 @@ public interface InformationAllService {
     //  4.18
     List<BaseShow> findShowByThreeType(String threeTypeName, Long userId);
     //4.18
-    List<Show> findShowByThreeTypeAll(Integer threeType);
+    List<Show> findShowByThreeTypeAll(Integer threeType,String host);
     
     //5.7
     Integer updateType(InformationAll vo);
     
     //5.16
-    Integer zhiding(Long id,String host);
+    Integer zhiding(Long id);
+    Integer zhidingup(Long id);
     
     //5.21
    Integer addShuoContent(InformationAll info);
@@ -112,4 +119,8 @@ public interface InformationAllService {
    String editBrandArticle(InformationAll vo, String host);
    
    InformationAll BrandExist(Long id);
+   
+   PageInfo<BaseShow> findStick(Integer pageNum, Integer pageSize, Integer type,String token);
+   
+   PageInfo<BaseShow> getshequ(Integer pageNum,Integer pageSize);
 }

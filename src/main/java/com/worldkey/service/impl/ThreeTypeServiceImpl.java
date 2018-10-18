@@ -24,6 +24,7 @@ import com.worldkey.mapper.UserGroupMapper;
 import com.worldkey.mapper.UsersMapper;
 import com.worldkey.service.InformationAllService;
 import com.worldkey.service.ThreeTypeService;
+import com.worldkey.service.UsersService;
 
 /*
  * 三级标签实现类
@@ -40,6 +41,8 @@ public class ThreeTypeServiceImpl extends ServiceImpl<ThreeTypeMapper, ThreeType
 	private UsersMapper uMapper; 
 	@Resource
 	private HistoryMapper hMapper;
+	@Resource
+	private UsersService usersService;
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -266,6 +269,25 @@ public class ThreeTypeServiceImpl extends ServiceImpl<ThreeTypeMapper, ThreeType
 			return new PageInfo<ThreeType>(joinedGroup);
 	}
 
-
-
+	@Override
+	public PageInfo<ThreeType> getXiaozu(Integer pageNum, Integer pageSize, String name,String token) {
+		Users user = usersService.findByToken(token);
+		PageHelper.startPage(pageNum, pageSize, true);
+		List<ThreeType> groupAll = this.threeTypeMapper.findXiaozu(name);
+		if(user!=null){
+			List<Integer> joinedGroupId = this.userGroupMapper.SelectExistence(user.getId());
+			for (int i = 0; i < groupAll.size(); i++) {
+				if (joinedGroupId.contains(groupAll.get(i).getId())) {
+					groupAll.get(i).setIsJoin(1);
+				} else {
+					groupAll.get(i).setIsJoin(0);
+				}
+			}
+		}
+		
+		return new  PageInfo<ThreeType>(groupAll);
+	}
+	
+	
 }
+

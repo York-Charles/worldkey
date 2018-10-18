@@ -30,6 +30,7 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.annotation.Resource;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,13 +64,14 @@ public class CommentController {
      * @throws Exception 懒
      */
     @PostMapping("addReply")
-    public ResultUtil addReply(@Validated({Reply.class}) Comment comment, BindingResult result, String token) throws Exception {
+    public ResultUtil addReply(@Validated({Reply.class}) Comment comment, BindingResult result, String token,String type) throws Exception {
         //参数规则校验
         Map<String, String> errorMap = this.check(result);
         if (errorMap != null) {
             return new ResultUtil(406, "no", errorMap);
         }
         int i = this.service.addReply(comment, token);
+        Long q = this.commenMapper.selectCommentIds();
         Users user = usersService.findByToken(token);
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("img", user.getHeadImg());
@@ -79,11 +81,11 @@ public class CommentController {
         SimpleDateFormat df = new SimpleDateFormat("MM月dd日 HH:mm"); 
         String date = df.format(day);
         map.put("date", date);
-        map.put("commentId", Long.toString(comment.getCommentId()));
+        map.put("commentId", Long.toString(q));
         map.put("fenlei", "7");
         map.put("content",comment.getInfo());
         Comment c = this.commenMapper.selectByPrimaryKey(comment.getComment());
-        Users user1 = usersService.selectByPrimaryKey(Long.parseLong(comment.getUsers().getId()+""));
+        Users user1 = usersService.selectByPrimaryKey(Long.parseLong(c.getUsers().getId()+""));
         String s = user1.getLoginName();//被推送人
         String s1 = c.getInfo();
         String a1 = user1.toString();
@@ -97,18 +99,45 @@ public class CommentController {
       		h.setUserId(user1.getId());
       		h.setToUserId(user.getId());
       		h.setUserName(user.getLoginName());
-      		h.setCommentId(Integer.parseInt(c.getCommentId()+""));
+      		h.setToCommentId(Integer.parseInt(c.getCommentId()+""));
       		h.setCommentInfo(comment.getInfo());
       		h.setClassify(7);
       		h.setACommentInfo(c.getInfo());
+      		
+      		 Long information = c.getInformation();
+             InformationAll infos = this.informationAllService.info(information);
+      		h.setTitleImg(infos.getTitleImg());
+      		h.setWebUrl(infos.getWeburl());
+      		h.setInformation(infos.getId());
       		this.hMapper.aaa(h);
-        
-        
+           	//外面回复	
+      		List<Comment> aaa = this.commenMapper.select1(comment.getComment());
+      		for(Comment cc:aaa){
+      			cc.setToUserId(user1.getId());
+      			List<Comment> bbb =this.commenMapper.selectByComments(comment.getComment());
+      			cc.setList(bbb);
+      		}
+      		PageInfo<Comment> ll = new PageInfo<>(aaa);
+//      		List<Comment> aaa = this.commenMapper.select2();
+      		
+      		//里面回复
+      		List<Comment> info = this.commenMapper.selectMaxComment();
+      		for(Comment cc:info){
+      			cc.setToUserId(user1.getId());
+      		}
+      		PageInfo<Comment> l = new PageInfo<>(info);
         if (i==1){
         	if(!(user.getId().equals(a1))){
             	Jdpush.jpushAndriod7(user.getPetName(),s,s1,a,map);
             	}
-            return new ResultUtil(200,"ok",1);
+        	if(type.equals("1")){
+        		return new ResultUtil(200,"ok",ll);
+        	}else if(type.equals("2")){
+        		return new ResultUtil(200,"ok",l);
+        	}else{
+        		return new ResultUtil(500,"no","失败");
+        	}
+            
         }else {
             throw  new Exception("添加失败");
         }
@@ -124,6 +153,7 @@ public class CommentController {
         int i = this.service.addReply1(comment, token);
 
         Users user = usersService.findByToken(token);
+        Long q = this.commenMapper.selectCommentIds();
         HashMap<String, String> map = new HashMap<String, String>();
         map.put("img", user.getHeadImg());
         map.put("name", user.getPetName());
@@ -132,11 +162,11 @@ public class CommentController {
         SimpleDateFormat df = new SimpleDateFormat("MM月dd日 HH:mm"); 
         String date = df.format(day);
         map.put("date", date);
-        map.put("commentId", Long.toString(comment.getCommentId()));
+        map.put("commentId", Long.toString(q));
         map.put("fenlei", "8");
         map.put("content",comment.getInfo());
         Comment c = this.commenMapper.selectByPrimaryKey(comment.getComment());
-        Users user1 = usersService.selectByPrimaryKey(Long.parseLong(comment.getUsers().getId()+""));
+        Users user1 = usersService.selectByPrimaryKey(Long.parseLong(c.getUsers().getId()+""));
         String s = user1.getLoginName();//被推送人
         String s1 = c.getInfo();
         String a1 = user1.toString();
@@ -150,17 +180,45 @@ public class CommentController {
       		h.setUserId(user1.getId());
       		h.setToUserId(user.getId());
       		h.setUserName(user.getLoginName());
-      		h.setCommentId(Integer.parseInt(c.getCommentId()+""));
+      		h.setToCommentId(Integer.parseInt(c.getCommentId()+""));
       		h.setCommentInfo(comment.getInfo());
       		h.setClassify(8);
       		h.setACommentInfo(c.getInfo());
+      		h.setToPetName(user1.getPetName());
+      		Date days=comment.getGmtCreate();
+      		SimpleDateFormat dfs = new SimpleDateFormat("MM月dd日 HH:mm"); 
+            String datess = dfs.format(days);
+      		h.setCommentCreateTime(datess); 
+      		
+      		Comment ccc = this.commenMapper.selectByPrimaryKey1(c.getComment());
+      		 Long information = ccc.getInformation();
+             InformationAll infos = this.informationAllService.info(information);
+      		h.setTitleImg(infos.getTitleImg());
+      		h.setWebUrl(infos.getWeburl());
+      		h.setInformation(infos.getId());
+
+      		Long ss=this.commenMapper.selectCommentIds();
+      		Integer ii = this.commenMapper.status(user.getId(), ss);
+      		h.setStatus(ii);
+      		Integer iii = this.commenMapper.praiseNum(ss);
+      		h.setPraiseNum(iii);
       		this.hMapper.aaa(h);
-        
+      		
+      		List<Comment> info = this.commenMapper.selectMaxComment();
+      		for(Comment cc:info){
+      			cc.setToPetName(user1.getPetName());
+      			cc.setToUserId(user1.getId());
+      		}
+      		PageInfo<Comment> l = new PageInfo<>(info);
+      		
+
+      		
+      		
         if (i==1){
         	if(!(user.getId().equals(a1))){
             	Jdpush.jpushAndriod8(user.getPetName(),s,s1,a,map);
             	}
-            return new ResultUtil(200,"ok",1);
+            return new ResultUtil(200,"ok",l);
         }else {
             throw  new Exception("添加失败");
         }
@@ -179,6 +237,22 @@ public class CommentController {
         PageInfo info=this.service.getReply1(comment,pageNum,pageSize);
         return new ResultUtil(200,"ok",info);
     }
+    //评论的回复和回复的回复整合在一个界面上,,,,,,,按时间
+    @RequestMapping("getReplyTime")
+    public ResultUtil getReplyTime(Long comment,@RequestParam(defaultValue = "1") Integer pageNum,
+                                    @RequestParam(defaultValue = "10") Integer pageSize,String token){
+        PageInfo info=this.service.getReplyTime(comment,pageNum,pageSize,token);
+        return new ResultUtil(200,"ok",info);
+    }
+    
+  //评论的回复和回复的回复整合在一个界面上,,,,,,,按点赞量
+    @RequestMapping("getReplyPraise")
+    public ResultUtil getReplyPraise(Long comment,@RequestParam(defaultValue = "1") Integer pageNum,
+                                    @RequestParam(defaultValue = "10") Integer pageSize,String token){
+        PageInfo info=this.service.getReplyPraise(comment,pageNum,pageSize,token);
+        return new ResultUtil(200,"ok",info);
+    }
+
 
 
 
@@ -211,7 +285,8 @@ public class CommentController {
         //验证商品是否存在
         
         //4.29
-        String s = info.getUsers().getLoginName();
+        Users user1 = usersService.selectByPrimaryKey(Long.parseLong(info.getUsers().getId()+""));
+        String s = user1.getLoginName();
         String a = comment.getInfo();//获取评论内容
         Long a1 = info.getUsers().getId();
         if (info == null) {
@@ -237,12 +312,16 @@ public class CommentController {
         map.put("content",comment.getInfo());
         map.put("title", info.getTitle());
         map.put("abstracte", info.getAbstracte());
+        
+        List<Comment> infos = this.commenMapper.selectMaxComment();
+  		PageInfo<Comment> l = new PageInfo<>(infos);
+        
         if (insert != 0) {
         	//4.29
         	if(!(user.getId().equals(a1))){
             	Jdpush.jpushAndriod1(user.getPetName(),s,a,map);
             	}
-            return new ResultUtil(200, "ok", insert + "");
+            return new ResultUtil(200, "ok", l);
         }
         //添加失败
         return new ResultUtil(500, "no", "添加失败");
@@ -259,16 +338,16 @@ public class CommentController {
     @RequestMapping("comment1")
     public ResultUtil selectComment1(Long information,
                                     @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        PageInfo<Comment> commentPageInfo = this.service.selectByInformationOrderByIdDesc1(information, pageNum, pageSize);
+                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,String token) {
+        PageInfo<Comment> commentPageInfo = this.service.selectByInformationOrderByIdDesc1(information, pageNum, pageSize,token);
         return new ResultUtil(200, "ok", commentPageInfo);
    }
     //按点赞量
     @RequestMapping("comment2")
     public ResultUtil selectComment2(Long information,
                                     @RequestParam(value = "pageSize", defaultValue = "5") Integer pageSize,
-                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum) {
-        PageInfo<Comment> commentPageInfo = this.service.selectByInformationOrderByIdDesc2(information, pageNum, pageSize);
+                                    @RequestParam(value = "pageNum", defaultValue = "1") Integer pageNum,String token) {
+        PageInfo<Comment> commentPageInfo = this.service.selectByInformationOrderByIdDesc2(information, pageNum, pageSize,token);
         return new ResultUtil(200, "ok", commentPageInfo);
     }
 

@@ -6,16 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Resource;
+
+import com.worldkey.entity.*;
+import com.worldkey.mapper.*;
+import com.worldkey.util.BestowUtil;
 import org.springframework.web.bind.annotation.*;
 
-import com.worldkey.entity.DissRecord;
-import com.worldkey.entity.Portrait;
-import com.worldkey.entity.ReqRecord;
-import com.worldkey.entity.Users;
-import com.worldkey.mapper.CoffeeBarUserMapper;
-import com.worldkey.mapper.DissRecordMapper;
-import com.worldkey.mapper.ReqRecordMapper;
-import com.worldkey.service.CoffeeBarService;
 import com.worldkey.service.CoffeeBarUserService;
 import com.worldkey.service.FriendService;
 import com.worldkey.service.ReqRecordService;
@@ -35,8 +31,6 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class CoffeeBarController {
 	@Resource
-	CoffeeBarService cbs;
-	@Resource
 	CoffeeBarUserService cbus;
 	@Resource
 	UsersService us;
@@ -52,6 +46,10 @@ public class CoffeeBarController {
 	ReqRecordService rs;
 	@Resource
 	DissRecordMapper dr;
+	@Resource
+	GiftMapper gm;
+	@Resource
+	CoffeeBarMapper coffeeBarMapper;
 
 	/**
 	 * 随机匹配咖啡厅
@@ -61,7 +59,7 @@ public class CoffeeBarController {
 	 */
 	@RequestMapping("matching")
 	public ResultUtil matching(Integer userId) {
-		return this.cbus.matchingState(userId, 0);
+		return this.cbus.matchingState(userId,0);
 	}
 
 	@RequestMapping("getUser")
@@ -70,7 +68,7 @@ public class CoffeeBarController {
 	}
 
 	/**
-	 * 
+	 !*     attention!!!!
 	 * @param userId
 	 *            离开用户Id
 	 * @param isToUserId
@@ -109,6 +107,11 @@ public class CoffeeBarController {
 		}
 	}
 
+	/**
+	 *
+	 * @param userId
+	 * @return
+	 */
 	@RequestMapping("getUserSeat1")
 	public ResultUtil getUserSeat1(Long userId) {
 		return new ResultUtil(200, "ok", this.cbus.getUserSeat(userId));
@@ -129,7 +132,6 @@ public class CoffeeBarController {
 	 * 更换场景
 	 * 
 	 * @param userId
-	 * @param sceneId
 	 * @return
 	 */
 	@RequestMapping("changing")
@@ -145,13 +147,11 @@ public class CoffeeBarController {
 	 * 依次为请求私奔、接受和拒绝
 	 * 
 	 * @param token
-	 * @param toUserId
 	 * @return
 	 * @throws Exception
 	 */
 	@RequestMapping("elopeRequest/{token}")
-	public ResultUtil enlopeRequest(@PathVariable String token, Integer seat, Integer barId, String message)
-			throws Exception {
+	public ResultUtil enlopeRequest(@PathVariable String token, Integer seat, Integer barId, String message) {
 		Users user = this.us.findByToken(token);
 		if (null != user) {
 			Long idBySeat = this.cbum.selectUserIdBySeat(seat, barId);
@@ -181,7 +181,7 @@ public class CoffeeBarController {
 			String[] array = list.toArray(s);
 			if (type == 1) {
 				return new ResultUtil(200, "ok",
-						this.fs.elopeHandler(user, FriendServiceImpl.EnlopeAccept, message, array));
+						(String)this.fs.elopeHandler(user, FriendServiceImpl.EnlopeAccept, message, array).get("channel"));
 			} else {
 				return new ResultUtil(200, "ok",
 						this.fs.elopeHandler(user, FriendServiceImpl.EnlopeReject, message, array));
@@ -195,31 +195,28 @@ public class CoffeeBarController {
 	@RequestMapping("broadcastRequest/{token}")
 	public ResultUtil enlopeReject(@PathVariable String token, Integer barId, String message, Integer seatId)
 			throws Exception {
-		Users user = us.findByToken(token);
-		Long userId = this.cbum.selectUserIdBySeat(seatId, barId);
-		ReqRecord rr = this.rrm.selectByIsReqId(userId);
-		ReqRecord rr1 = this.rrm.selectByIsReqId(user.getId());
-		if(rr != null){
+		Users user = us.findByToken(token); //请求人
+		Long userId = this.cbum.selectUserIdBySeat(seatId, barId); //被请求人id
+		Integer rr = this.rrm.selectByIsReqId2(userId); //记录
+		Integer rr1 = this.rrm.selectByIsReqId2(user.getId());  //记录
+		if(rr != 0){
 			return new ResultUtil(200, "error1", null);
-		}if(rr1 != null){
+		}if(rr1 != 0){
 			return new ResultUtil(200, "error2", null);
 		}
 		if (user != null) {
-			List<Integer> seated = this.cbum.selectSeated(barId);
-			Integer seat = this.cbum.selectSeatByUserId(user.getId());
-			seated.remove(seat);
+			List<Integer> seated = this.cbum.selectSeated(barId);  //所有座位
+			Integer seat = this.cbum.selectSeatByUserId(user.getId()); //请求人座位号
+			seated.remove(seat); //除了请求人座位号
 			List<String> list = new ArrayList<String>();
-			log.info("mark1");
 			for (int i = 0; i < seated.size(); i++) {
 				Users u = this.us.selectByPrimaryKey(this.cbum.selectUserIdBySeat(seated.get(i), barId));
-				list.add(u.getLoginName());
+				list.add(u.getLoginName());//所有需要推送人的用户名
 			}
-			log.info("mark2");
-			String isreq = this.cbum.selectUserIdBySeat(seatId, barId).toString();
-			if (this.rrm.selectExist(user.getId(), Long.parseLong(isreq)) != null) {
+			String isreq = this.cbum.selectUserIdBySeat(seatId, barId).toString();  //被请求者id
+			if (this.rrm.selectExist(user.getId(), userId) != null) {
 				return new ResultUtil(200, "error3", null);
 			}
-			log.info("mark3");
 			list.add(isreq);
 			String[] s = new String[list.size()];
 			String[] array = list.toArray(s);
@@ -230,7 +227,6 @@ public class CoffeeBarController {
 			log.info(enlopeRequest.toString() + ">>>>>>>>>>>>>>>>>>");
 			Portrait p = new Portrait(seat, this.cbum.selectLabelByUserId(user.getId().toString()), seatId,
 					this.cbum.selectIcon1(user.getId()));
-			log.info("mark5");
 			return new ResultUtil(200, "ok", p);
 		}
 		return new ResultUtil(200, "error4", null); 
@@ -263,7 +259,8 @@ public class CoffeeBarController {
 		Integer id = user.getId().intValue();
 		if(this.cbum.selectChecked(userId).getInfoChk()==0&this.cbum.selectChecked(id).getInfoChk()==0){
 			this.cbum.infoCheck(userId);
-			return new ResultUtil(200,"ok",this.fs.infoCheck(user.getLoginName(),"对方向您发送了私人信息访问请求", user1.getLoginName()));
+			return new ResultUtil(200,"ok",this.fs.infoCheck(user.getLoginName(),"对方向您发送了查看私人信息访问请求"
+					, user1.getLoginName()));
 		}else if(this.cbum.selectChecked(userId).getInfoChk()==1
 				|this.cbum.selectChecked(id).getInfoChk()==1){
 			this.fs.infoCheck1(user, user1);
@@ -291,5 +288,64 @@ public class CoffeeBarController {
 			this.dr.changeDissId(drecord);
 		}
 		return new ResultUtil(200,"ok",this.cbum.selectSeatByUserId(dissuId));
+	}
+
+	@RequestMapping("barrage")
+	public ResultUtil Barrage(Integer userId,String message,Integer barId){
+		List<Integer> seated = this.cbum.selectSeated(barId);
+		Integer seat = this.cbum.selectSeatByUserId(userId.longValue());
+		seated.remove(seat);
+		List<String> list = new ArrayList<>();
+		if(seated.size()==0){
+			return new ResultUtil(200,"ok",this.cbum.selectIcon3(userId));
+		}
+		for (int i = 0; i < seated.size(); i++) {
+			Users u = this.us.selectByPrimaryKey(this.cbum.selectUserIdBySeat(seated.get(i), barId));
+			list.add(u.getLoginName());
+		}
+		String[] s = new String[list.size()];
+		String[] array = list.toArray(s);
+		this.fs.barrage(this.us.selectByPrimaryKey(userId.longValue()).getLoginName()
+				,message,this.cbum.selectIcon3(userId),FriendServiceImpl.BARRAGE,array);
+		return new ResultUtil(200,"ok",this.cbum.selectIcon3(userId));
+	}
+
+	@RequestMapping("bestow/{token}")
+	public ResultUtil Bestow(@PathVariable String token,Integer barId,Integer giftId,Integer toSeat){
+		Users user = this.us.findByToken(token);
+		Integer userId =user.getId().intValue();
+		List<Integer> seated = this.cbum.selectSeated(barId);
+		Integer seat = this.cbum.selectSeatByUserId(userId.longValue());
+		seated.remove(seat);
+		List<String> list = new ArrayList<>();
+		for (int i = 0; i < seated.size(); i++) {
+			Users u = this.us.selectByPrimaryKey(this.cbum.selectUserIdBySeat(seated.get(i), barId));
+			list.add(u.getLoginName());
+		}
+		String[] s = new String[list.size()];
+		String[] array = list.toArray(s);
+		Integer code = this.fs.giftUsers(token, giftId, this.cbum.selectUserIdBySeat(toSeat, barId), array);
+		String ss = this.cbum.selectLabelByUserId(user.getId().toString())+"给"+
+				this.cbum.selectLabelByUserId(this.cbum.selectUserIdBySeat(toSeat, barId).toString())+"赠送了"+this.gm.getName(giftId);
+		if(code.equals(3)){
+			return new ResultUtil(200,"ok",new BestowUtil(ss,
+					this.cbum.selectSeatByUserId(user.getId()),toSeat,this.gm.getGiftImg(giftId),code));
+		}else{
+			return new ResultUtil(500,"error",new BestowUtil(code));
+		}
+
+	}
+
+	@RequestMapping("getHeadIcon1")
+	public ResultUtil getHeadIcon1(Integer userId,Integer type){
+		Map<String, Object> map = this.cbus.getUserSeatAfterLeaving(userId);
+		Map<String, Object> map1 = this.cbus.WeggenNachrichten(userId);
+		if(type.equals(1)) {
+			return new ResultUtil(200, "ok",  map.get("label") + "离开了"
+					+  map.get("channelName"));
+		}else {
+			return new ResultUtil(200, "ok",  map1.get("label") + "离开了"
+					+  map1.get("channelName"));
+		}
 	}
 }

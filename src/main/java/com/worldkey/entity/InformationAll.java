@@ -33,6 +33,9 @@ public class InformationAll implements Serializable {
 	
 	private Integer classify;
 	private Users users;
+	private Integer stick;
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private Date stickDate;
 	/**
 	 * 值与对应的状态 0 ->未审核 1 ->已审核 2 ->草稿 3 ->已下架
 	 */
@@ -51,6 +54,8 @@ public class InformationAll implements Serializable {
 	 * 个人品牌展示文章
 	 */
 	private Integer userBrand;
+	//bug反馈
+	private Integer solve;
 
 	private static final long serialVersionUID = 1L;
 

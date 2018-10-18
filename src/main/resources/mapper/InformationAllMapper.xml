@@ -16,6 +16,9 @@
         <result column="classify" property="classify" jdbcType="INTEGER"/>
         <result column="competitive" property="competitive" jdbcType="INTEGER"/>
         <result column="user_brand" property="userBrand" jdbcType="INTEGER"/>
+         <result column="stick" property="stick" jdbcType="INTEGER"/>
+          <result column="stick_date" property="stickDate" jdbcType="TIMESTAMP"/>
+           <result column="solve" property="solve" jdbcType="INTEGER"/>
         <association property="users" column="users" javaType="com.worldkey.entity.Users"
                      select="com.worldkey.mapper.UsersMapper.selectByPrimaryKey"/>
     </resultMap>
@@ -23,7 +26,7 @@
         <result column="info" property="info" jdbcType="LONGVARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id, create_date, title, title_img, type, weburl, abstracte, auther, point_number, checked, users,classify,competitive,user_brand
+        id, create_date, title, title_img, type, weburl, abstracte, auther, point_number, checked, users,classify,competitive,user_brand,stick,stick_date,solve
     </sql>
     <sql id="Blob_Column_List">
         info
@@ -152,7 +155,8 @@
         i.auther,
         i.point_number,
         i.checked,
-         i.classify
+         i.classify,
+         i.stick
         FROM
         users AS u
         INNER JOIN information_all AS i ON i.users = u.id
@@ -221,8 +225,11 @@
     </select>
     <select id="selectBySelective" resultMap="BaseResultMap" parameterType="com.worldkey.entity.InformationAll">
         select
-        <include refid="Base_Column_List"/>
+        information_all.id, information_all.create_date, information_all.title, information_all.title_img, information_all.type, information_all.weburl, information_all.abstracte, information_all.auther, information_all.point_number, information_all.checked, information_all.users,information_all.classify,information_all.competitive,information_all.user_brand,information_all.stick,information_all.solve
+        users.pet_name AS petName,
+        users.head_img AS headImg
         from information_all
+        INNER JOIN users on users.id=information_all.users
         <where>
             <if test="type!=null">
                 type = #{type,jdbcType=INTEGER}
@@ -323,6 +330,15 @@
             <if test="userBrand != null">
                 user_brand,
             </if>
+             <if test="stick != null">
+                stick,
+            </if>
+             <if test="stickDate != null">
+                stickDate,
+            </if>
+             <if test="solve != null">
+                solve,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -369,6 +385,15 @@
             </if>
             <if test="userBrand != null">
                #{userBrand,jdbcType=INTEGER},
+            </if>
+               <if test="stick != null">
+                #{stick,jdbcType=INTEGER},
+            </if>
+             <if test="stickDate != null">
+               #{stickDate,jdbcType=TIMESTAMP},
+            </if>
+             <if test="solve != null">
+               #{solve,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>
@@ -441,14 +466,7 @@
     </update>
     
     
-  
-    
-    
-      <update id="zhiding" parameterType="java.lang.Long">
-       update information_all set id=(select id from
-		(select MAX(id) id from information_all) temp)+1 where id=#{id}
-    </update>
-  
+ 
     
     
 </mapper>

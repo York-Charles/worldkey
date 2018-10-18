@@ -58,7 +58,7 @@
             float: left;
             display: table-cell;
             line-height: 50px;
-            color: #f4c02b;
+            color: #000;
             font-size: 14px;
         }
         #follow{
@@ -69,17 +69,18 @@
 </head>
 <body>
 <div style=" height: 60px;">
-   <!--  <img id="headImg" src="${info.users.headImg}">  -->
-    <span id="petName"><!-- ${info.users.petName}  -->
+    <img id="headImg" src="${info.users.headImg}">  
+    <span id="petName"> ${info.users.petName}  
      ${createTime}
     </span>
    
    <%-- <button id="follow">关注</button>--%>
 </div>
+<div style=" height: 30px; font-size: 15px;line-height:1.5;display:inline-block;">${info.title}</div>
+<br></br>
+<div style=" height: 40px; font-size: 14px;line-height:2.2;display:inline-block;">${info.info}</div>
 
 
-<div style=" height: 50px; font-size: 16px;line-height:1.5;display:inline-block;">${info.title}</div>
 
-<div style=" height: 60px; font-size: 14px;line-height:2.2;display:inline-block;">${info.info}</div>
 </body>
 </html>

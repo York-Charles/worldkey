@@ -77,4 +77,7 @@ public interface PraiseMapper {
 
     @Select("select * from praise where users=#{users.id} and information=#{information}")
     List<Praise> selectExist(Praise p);
+    
+    @Select("select status from praise where users=#{userID} and information=#{information}")
+    Integer i(@Param("userID")Long userID,@Param("information")Long information);
 }

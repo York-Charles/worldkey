@@ -632,4 +632,5 @@ public class UsersServiceImpl implements UsersService {
 	public Integer updatePersonalBrand(Long userId) {
 		return this.uMapper.updatePersonalBrand(userId);
 	}
+
 }

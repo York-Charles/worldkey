@@ -20,7 +20,7 @@
 	<title>更新数据</title>
 	<link rel="stylesheet" type="text/css" href="css/wangEditor.min.css">
 	<!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
-	<link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
 		  integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 	<script src="js/jquery-3.1.1.min.js"></script>
 	<style type="text/css">
@@ -74,16 +74,27 @@
 		 action="users/information/update" modelAttribute="info">
 	<%--@elvariable id="twoType" type="com.worldkey.entity.TwoType"--%>
 	<%--@elvariable id="oneType" type="com.worldkey.entity.OneType"--%>
+	
+	<c:if test="${twotype!=225&&twotype!=226}">
 	<div class="form-group" style="height: 45px">
 		<span for="title">标题:</span>
 		<sf:input path="title" id="title" cssClass="form-control"/>
 		<label for="abstracte">摘要:</label>
 		<sf:input cssClass="form-control" path="abstracte" id="abstracte"/>
 	</div>
+	</c:if>
+	<c:if test="${twotype==225||twotype==226}">
+	<div class="form-group" style="height: 45px">
+		<span for="title">说说:</span>
+		<sf:input path="title" id="title" size="60"  cssClass="form-control"/>
+	</div>
+	</c:if>
+	
 	<span id="saveState" style="position:absolute; right: 10px;"></span>
 	<div id="editor" class="fullscreen-editor">
-			${info.info}
+                   ${info.info}
 	</div>
+	 <input type="button" name="" class="but btn-sm btn-warning glyphicon glyphicon-search" onclick="location.href='javascript:history.go(-1)'" value="返回">
 </sf:form>
 <!--引入jquery和wangEditor.js-->
 <!--注意：javascript必须放在body最后，否则可能会出现问题-->

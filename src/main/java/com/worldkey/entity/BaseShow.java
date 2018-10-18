@@ -28,4 +28,9 @@ public class BaseShow {
     private Integer isPraise;
     private Integer competitive;
     private String petName;
+    private Integer status;
+    private Integer stick;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date stickDate;
+    private Integer solve;
 }

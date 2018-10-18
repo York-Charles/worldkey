@@ -25,13 +25,20 @@ public class History {
 	private String titleImg;
 	private String webUrl;
 	private Integer groupId;
-	private String commentInfo;//被评论内容
-	private Integer commentId;
-	private String aCommentInfo;//评论内容
+	private String commentInfo;//评论内容 点赞时候为被点赞的内容
+	private Integer toCommentId;
+	private String aCommentInfo;//被评论内容
 	private Long toUserId;//评论人ID
+	
+	private Integer mark;
+	private Integer status;
+	private Integer praiseNum;
+	private String toPetName;
+	private String commentCreateTime;
+
 	public History(Integer id, String groupName, Long userId, String userName, String groupImg,
 			String petName, Long information, Date createTime, String info, List<String> giftName, String loginName,
-			Integer classify, String headImg, String title, String titleImg, String webUrl,Integer groupId,String commentInfo,Integer commentId,String aCommentInfo,Long toUserId) {
+			Integer classify, String headImg, String title, String titleImg, String webUrl,Integer groupId,String commentInfo,Integer toCommentId,String aCommentInfo,Long toUserId) {
 		super();
 		this.id = id;
 		this.groupName = groupName;
@@ -51,7 +58,7 @@ public class History {
 		this.webUrl = webUrl;
 		this.groupId = groupId;
 		this.commentInfo = commentInfo;
-		this.commentId = commentId;
+		this.toCommentId = toCommentId;
 		this.aCommentInfo = aCommentInfo;
 		this.toUserId = toUserId;
 	}

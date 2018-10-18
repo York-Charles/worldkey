@@ -27,6 +27,8 @@ public interface FriendMapper {
     		"u.birthday as birthday,  "+
     		"u.email as email,  "+
     		"u.sex as sex,  "+
+    		"u.signature as signature,"+
+    		"u.id as userId, "+
     		"f.friend as usersId  "+
     		"FROM "+  
     		"users AS u ,friend as f "+
@@ -52,6 +54,21 @@ public interface FriendMapper {
 	@Select("select record.id,record.to_user_id,record.user_id,record.message,record.create_time,record.type,users.pet_name AS petName,users.login_name AS loginName,users.head_img AS headImg from record left join users on users.login_name = record.user_id where record.to_user_id=#{toUserId} order by record.create_time desc")
 	List<Record> selectRecord(String toUserId);
 	
-	@Update("update record set type=1 where to_user_id=#{toUserId} and user_id=#{userId}")
+	@Update("update record set type=1 where to_user_id=#{userId} and user_id=#{toUserId}")
 	int updateType(@Param("userId")String userId,@Param("toUserId")String toUserId);
+	
+	@Select("select * from record where (user_id = #{userId} and to_user_id = #{toUserId}) or (user_id = #{toUserId} and to_user_id = #{userId})")
+	Record selectR(@Param("userId")String userId,@Param("toUserId")String toUserId);
+	
+	@Update("update record set message=#{message},create_time=NOW() where user_id = #{userId} and to_user_id = #{toUserId}")
+	int cover(@Param("userId")String userId,@Param("toUserId")String toUserId, @Param("message")String message);
+	
+	@Update("update record set type=0 where (user_id = #{userId} and to_user_id = #{toUserId}) or (user_id = #{toUserId} and to_user_id = #{userId})")
+	int delRecord(@Param("userId")String userId,@Param("toUserId")String toUserId);
+	
+	@Select("select id from users where login_name=#{loginName}")
+	Long selectUserId(String LoginName);
+	
+	@Select("select head_img from users where id=#{userId}")
+	String getHeadImg(Long userId);
 }

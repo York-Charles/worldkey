@@ -20,7 +20,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import javax.validation.constraints.NotNull;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author HP
@@ -70,6 +73,8 @@ public class RongYunController {
         }
         log.debug("Users不为空，用户已登陆");
         log.debug("删除自己好友列表中的好友关系");
+        this.friendMapper.delRecord(byToken.getLoginName(), friendId);
+        this.friendMapper.delRecord(friendId, byToken.getLoginName());
         int i = this.friendService.delFriend(new Friend(byToken.getLoginName(), friendId, ""));
         log.debug("删除结果：" + i);
         log.debug("删除好友列表中的自己的好友关系");
@@ -90,7 +95,22 @@ public class RongYunController {
         Users users = usersService.findByToken(token);
         if (null != users) {
             log.info("add friend request " + users.getLoginName() + " to " + toUsersID);
-            this.friendService.record(users.getLoginName(),toUsersID,message);
+            
+            
+            Record r = this.friendMapper.selectR(users.getLoginName(),toUsersID);
+            if(r!=null&&r.getType()==0){
+            	this.friendMapper.cover(users.getLoginName(),toUsersID,message);
+            	  return this.friendService.addFriend(users.getLoginName(), FriendServiceImpl.REQUEST, message, toUsersID);
+            }else if(r!=null&&r.getType()==1){
+            	 HashMap<String,Object> map = new HashMap<String,Object>();
+                 map.put("status", 1);
+            	  return map;
+            }else if(r==null){
+            	this.friendMapper.insertNotify(users.getLoginName(), toUsersID, message);
+            }
+            
+            
+//            this.friendService.record(users.getLoginName(),toUsersID,message);
             return this.friendService.addFriend(users.getLoginName(), FriendServiceImpl.REQUEST, message, toUsersID);
         }
         log.error("未登录");
@@ -108,8 +128,10 @@ public class RongYunController {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
-            return result;
+            HashMap<String,Object> map = new HashMap<String,Object>();
+            map.put("result", result);
+            map.put("status", 1);
+            return map;
         }
         return "请先登录";
     }
@@ -142,13 +164,16 @@ public class RongYunController {
         FriendExample map = new FriendExample();
         map.setUsersname(user.getPetName());
         map.setNote(user.getPetName());
-        String defaultHeadImg = systemConfigService.find().getDefaultHeadimg();
-        map.setHeadimg(user.getHeadImg() == null ? defaultHeadImg : user.getHeadImg());
+//        String defaultHeadImg = systemConfigService.find().getDefaultHeadimg();
+//        map.setHeadimg(user.getHeadImg() == null ? defaultHeadImg : user.getHeadImg());
+        map.setHeadimg(this.friendMapper.getHeadImg(user.getId()));
         map.setUsersId(user.getLoginName());
+        map.setUserId(user.getId());
         map.setSex(user.getSex());
         map.setTelNum(user.getTelNum());
         map.setBirthday(user.getBirthday());
         map.setEmail(user.getEmail());
+        map.setSignature(user.getSignature());
         list.add(map);
         return new ResultUtil(200, "ok", list);
     }
@@ -174,6 +199,13 @@ public class RongYunController {
     	String toUserId = user.getLoginName();
         List<Record> list = this.friendService.select(toUserId);
 		return new ResultUtil (200, "ok", list);
+    	
+    }
+    
+    @RequestMapping("findUserId")
+    public ResultUtil selectUserId(String loginName){
+    	Long i = this.friendService.selectUserId(loginName);
+		return new ResultUtil (200, "ok", i);
     	
     }
 }

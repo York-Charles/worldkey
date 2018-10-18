@@ -17,6 +17,11 @@ public interface CoffeeBarUserMapper {
 	Integer matchingState(@Param("userId")Integer userId,@Param("coffeeBarId")Integer coffeeBarId
 			,@Param("seat")Integer seat,@Param("label")String label);
 
+	@Update("update coffee_bar_user set coffee_bar_id=#{coffeeBarId},seat=#{seat}," +
+			"label=#{label} where user_id=#{userId}")
+	Integer Changing(@Param("userId")Integer userId,@Param("coffeeBarId")Integer coffeeBarId
+			,@Param("seat")Integer seat,@Param("label")String label);
+
 	@Select("select user_id,coffee_bar_id from coffee_bar_user where ifelo=0")
 	List<CoffeeBarUser> getAll();
 	
@@ -42,6 +47,9 @@ public interface CoffeeBarUserMapper {
 	@Select("select label  from coffee_bar_user"
 			+ " where user_id=#{userId} and ifelo=0")
 	String selectLabelByUserId(String userId);
+
+	@Select("select label  from coffee_bar_user where user_id=#{userId}")
+	String selectLabelByUserId1(Integer userId);
 	
 	@Select("select user_id,coffee_bar_id  as bar_id,seat,label,sex from coffee_bar_user,users where "
 			+ "user_id=#{userId} and user_id=users.id")
@@ -66,6 +74,9 @@ public interface CoffeeBarUserMapper {
 	
 	@Select("select coffee_bar_id from coffee_bar_user where user_id=#{userId} and ifelo=0")
 	Integer selectBarIdByUserId(Integer userId);
+
+	@Select("select coffee_bar_id from coffee_bar_user where user_id=#{userId}")
+	Integer selectBarIdByUserId1(Integer userId);
 	
 	@Select("select seat from coffee_bar_user where user_id=#{userId} and ifelo=0")
 	Integer selectSeatByUserId(Long userId);
@@ -77,13 +88,17 @@ public interface CoffeeBarUserMapper {
 			+ "c.user_id=#{userId}")
 	String selectIcon1(Long userId);
 	
-	@Select("select icon from icon inner join coffee_bar_user as c on c.label=icon.name where "
+	@Select("select yellow from icon inner join coffee_bar_user as c on c.label=icon.name where "
 			+ "c.user_id=#{userId}")
-	String selectIcon(Integer userId);
+	String selectIcon4(Long userId);
 	
 	@Select("select icon1 from icon inner join coffee_bar_user as c on c.label=icon.name where "
 			+ "c.user_id=#{userId}")
 	String selectIcon2(Integer userId);
+
+	@Select("select icon2 from icon inner join coffee_bar_user as c on c.label=icon.name where "
+			+ "c.user_id=#{userId}")
+	String selectIcon3(Integer userId);
 	
 	@Select("select count(user_id) from coffee_bar_user where coffee_bar_id=#{cid} and ifelo=0")
 	Integer selectUsers(Integer cid);
@@ -105,4 +120,7 @@ public interface CoffeeBarUserMapper {
 	
 	@Select("select info_chk from coffee_bar_user where user_id=#{userId}")
 	CoffeeBarUser selectChecked(Integer userId);
+
+		@Select("select login_name from users inner join coffee_bar_user as c on c.user_id=users.id where c.coffee_bar_id=#{barId}")
+	List<String> selectUserIdByBarId(Integer barId);
 }

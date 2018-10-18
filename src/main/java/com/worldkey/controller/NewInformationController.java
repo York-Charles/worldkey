@@ -12,6 +12,7 @@ import com.worldkey.mapper.PraiseMapper;
 import com.worldkey.mapper.UserGroupMapper;
 import com.worldkey.service.BrowsingHistoryService;
 import com.worldkey.service.InformationAllService;
+import com.worldkey.service.ThreeTypeService;
 import com.worldkey.service.UsersService;
 import com.worldkey.util.ResultUtil;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +39,10 @@ public class NewInformationController {
 	private UserGroupMapper ugMapper;
 	@Resource
 	private PraiseMapper praiseMapper;
+	@Resource
+	private ThreeTypeService threeTypeService;
+	@Resource
+	private UsersService uService;
 
 	@RequestMapping("/find/oneType")
 	public ResultUtil findByOneType(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
@@ -85,12 +90,50 @@ public class NewInformationController {
 
 	@RequestMapping("/find/twoType/{type}")
 	public ResultUtil findByTwoType(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
-			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, @PathVariable Integer type) {
+			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, @PathVariable Integer type,String token) {
 		PageHelper.startPage(pageNum, pageSize);
 		// 因添加三级，固将此selectShowByTwoType方法隐藏4.19
 		// List<BaseShow> baseShows =
 		// informationAllMapper.selectShowByTwoType(type);
 		List<BaseShow> baseShows = informationAllMapper.selectShowThreeTypeAllByTwoType(type);
+		if(token!=null){
+			Users user = usersService.findByToken(token);
+	        for(BaseShow l:baseShows){
+	        	
+	        	Integer i = this.praiseMapper.i(user.getId(),l.getId());
+	        	l.setStatus(i);
+	        }
+        }
+		List<BaseShow> commentNum = informationAllMapper.selectCommentNum();
+		if (token != null) {
+			for (int i = 0; i < baseShows.size(); i++) {
+				Users user = usersService.findByToken(token);
+				Praise p = new Praise();
+				p.setUsers(user);
+				p.setInformation(Integer.parseInt(baseShows.get(i).getId() + ""));
+				List<Praise> isPraise = praiseMapper.selectExist(p);
+				if (isPraise.size() == 0) {
+					baseShows.get(i).setIsPraise(0);
+				} else {
+					baseShows.get(i).setIsPraise(1);
+				}
+				for (int j = 0; j < commentNum.size(); j++) {
+					if (baseShows.get(i).getId().equals((commentNum.get(j).getId()))) {
+						baseShows.get(i).setCommentNum(commentNum.get(j).getCommentNum());
+						break;
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < baseShows.size(); i++) {
+				for (int j = 0; j < commentNum.size(); j++) {
+					if (baseShows.get(i).getId().equals((commentNum.get(j).getId()))) {
+						baseShows.get(i).setCommentNum(commentNum.get(j).getCommentNum());
+						break;
+					}
+				}
+			}
+		}
 		PageInfo<BaseShow> baseShowPageInfo = new PageInfo<>(baseShows);
 		return new ResultUtil(200, "ok", baseShowPageInfo);
 	}
@@ -113,6 +156,13 @@ public class NewInformationController {
 			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,
 			@RequestParam(value = "groupId") Integer type, String token) {
 		return new ResultUtil(200, "ok", this.informationAllService.getShuoComponent(type, pageNum, pageSize, token));
+	}
+	
+	
+	@RequestMapping("/find/shequ")
+	public ResultUtil shequ(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
+			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,@RequestHeader("host") String host) {
+		return new ResultUtil(200, "ok", this.informationAllService.getshequ(pageNum, pageSize));
 	}
 	/*
 	 * 此接口和上面("/find/twoType/{type}")重复，隐藏 //通过二级id获取三级的详情列表
@@ -148,7 +198,8 @@ public class NewInformationController {
 			PageInfo<BaseShow> pageInfo = new PageInfo<>(list);
 			return new ResultUtil(200, "ok", pageInfo);
 		} else {
-			return new ResultUtil(200, "ok", browsingHistoryService.recommendation(user.getId(), pageNum, pageSize));
+			PageInfo<BaseShow> pageInfo =browsingHistoryService.recommendation(user.getId(), pageNum, pageSize);
+			return new ResultUtil(200, "ok", pageInfo);
 		}
 	}
 
@@ -203,5 +254,18 @@ public class NewInformationController {
 	@RequestMapping("brandExist")
 	public ResultUtil brandExist(Long userId){
 		return new ResultUtil(200,"ok",this.informationAllService.BrandExist(userId)==null?0:1);
+	}
+	
+	@RequestMapping("findXiaozu")
+	@ResponseBody
+	public ResultUtil Xiaozu(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
+			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize,String difference,String name,String token) throws Exception {
+		if(difference.equals("小组")){
+			return new ResultUtil(200, "ok", this.threeTypeService.getXiaozu(pageNum, pageSize, name,token));
+		}else if(difference.equals("活动")){
+			return new ResultUtil(200,"ok","暂无");
+		}
+				return new ResultUtil(200,"ok","111");
+		
 	}
 }

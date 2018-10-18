@@ -17,7 +17,7 @@
     <title>世界钥匙管理系统</title>
     <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
     <link rel="stylesheet"
-          href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css"
           integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
           crossorigin="anonymous">
     <script src="js/jquery-3.1.1.min.js"></script>

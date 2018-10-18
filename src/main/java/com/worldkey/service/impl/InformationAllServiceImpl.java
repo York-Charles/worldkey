@@ -23,6 +23,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
@@ -86,9 +87,12 @@ public class InformationAllServiceImpl implements InformationAllService {
 	 * 通过二级分类查询
 	 */
 	@Override
-	public PageInfo<InformationAll> findByType(Integer pageNum, Integer pageSize, Integer type) {
+	public PageInfo<InformationAll> findByType(Integer pageNum, Integer pageSize, Integer type,String host) {
 		PageHelper.startPage(pageNum, pageSize, true);
 		List<InformationAll> list = this.allMapper.selectByType(type);
+        for(InformationAll a:list){
+			a.setWeburl("http://" + host + "/informationall/info1/" + a.getId());
+		}
 		return new PageInfo<>(list);
 	}
 
@@ -128,6 +132,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 		/* = this.imageService.imageHandle(vo.getInfo(), host); */
 		vo.setCreateDate(new Date());
 		vo.setClassify(1);
+		vo.setStick(0);
 		this.allMapper.insertSelective(vo);
 		Long id = this.allMapper.seleceMAXId();
 		InformationAll info = this.allMapper.selectLastButOne();
@@ -165,12 +170,13 @@ public class InformationAllServiceImpl implements InformationAllService {
 		vo = this.worldFilter(vo);
 		vo.setCreateDate(new Date());
 		vo.setClassify(1);
+		vo.setStick(0);
 		this.allMapper.insertSelective(vo);
 		InformationAll up = new InformationAll();
 		up.setId(vo.getId());
 		up.setWeburl("http://" + host + "/informationall/info/" + vo.getId());
 		this.allMapper.updateByPrimaryKeySelective(up);
-		return "http://" + host + "/informationall/info1/" + vo.getId();
+		return "http://" + host + "/informationall/info/" + vo.getId();
 	}
 
 	@Override
@@ -192,7 +198,17 @@ public class InformationAllServiceImpl implements InformationAllService {
 
 	@Override
 	public List<BaseShow> findOrderByPointNumber1() {
-		return this.allMapper.selectOrderByPointNumberShowBean();
+		List<BaseShow> list = this.allMapper.selectOrderByPointNumberShowBean();
+		List<BaseShow> commentNum = informationAllMapper.selectCommentNum();
+		 for(int i = 0;i<list.size();i++){
+  			for(int j =0;j<commentNum.size();j++){
+  				if(list.get(i).getId().equals((commentNum.get(j).getId()))){
+  					list.get(i).setCommentNum(commentNum.get(j).getCommentNum());
+  					break;
+  				}
+  			}
+  		}
+		return list;
 	}
 
 	/**
@@ -251,14 +267,32 @@ public class InformationAllServiceImpl implements InformationAllService {
 		}
 		return info(itemID);
 	}
+	
+	@Override
+	public PageInfo<InformationAll> findBySelective(Integer pageNum, Integer pageSize, InformationAll vo,String host) {
+		PageHelper.startPage(pageNum, pageSize, true);
+		List<InformationAll> list = this.allMapper.selectBySelective(vo);
+		 for(InformationAll a:list){
+				a.setWeburl("http://" + host + "/informationall/info1/" + a.getId());
+			}
+		return new PageInfo<>(list);
+	}
 
 	/**
 	 * 以InformationAll属性为区别查询，type，title模糊查询
 	 */
 	@Override
-	public PageInfo<InformationAll> findBySelective(Integer pageNum, Integer pageSize, InformationAll vo) {
+	public PageInfo<BaseShow> findBySelective1(Integer pageNum, Integer pageSize, InformationAll vo,String token) {
 		PageHelper.startPage(pageNum, pageSize, true);
-		List<InformationAll> list = this.allMapper.selectBySelective(vo);
+		List<BaseShow> list = this.allMapper.selectBySelective1(vo);
+		if(token!=null){
+			Users user = usersService.findByToken(token);
+	        for(BaseShow l:list){
+	        	
+	        	Integer i = this.praiseMapper.i(user.getId(),l.getId());
+	        	l.setStatus(i);
+	        }
+        }
 		return new PageInfo<>(list);
 	}
 
@@ -350,8 +384,14 @@ public class InformationAllServiceImpl implements InformationAllService {
 	}
 
 	@Override
-	public List<Show> findShowByOneTypeAll(Integer oneType, String word) {
-		return this.allMapper.selectShowByOneTypeAll(oneType, word);
+	public List<Show> findShowByOneTypeAll(Integer oneType, String word,String host) {
+		
+				List<Show> list=this.allMapper.selectShowByOneTypeAll(oneType, word);
+				 for(Show a:list){
+						a.setWebUrl("http://" + host + "/informationall/info1/" + a.getId());
+					}
+				
+				return list;
 	}
 
 	@Override
@@ -394,6 +434,18 @@ public class InformationAllServiceImpl implements InformationAllService {
 		 */
 		return this.allMapper.checked(vo);
 	}
+	
+	/**
+	 * 修改bug状态solve
+	 */
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	@Override
+	@CacheEvict(value = "info", key = "'InformationAll'+#vo.id")
+	public int solve(InformationAll vo) {
+		Date date = new Date();
+		vo.setCreateDate(date);
+		return this.allMapper.solve(vo);
+	}
 
 	private InformationAll worldFilter(InformationAll vo) {
 		String abstracte = vo.getAbstracte();
@@ -419,8 +471,13 @@ public class InformationAllServiceImpl implements InformationAllService {
 
 	// 4.18
 	@Override
-	public List<Show> findShowByThreeTypeAll(Integer threeType) {
-		return this.allMapper.selectShowByThreeTypeAll(threeType);
+	public List<Show> findShowByThreeTypeAll(Integer threeType,String host) {
+		 List<Show> list=this.allMapper.selectShowByThreeTypeAll(threeType);
+		 for(Show a:list){
+				a.setWebUrl("http://" + host + "/informationall/info1/" + a.getId());
+			}
+		 
+		 return list;
 	}
 
 	@Override
@@ -448,14 +505,9 @@ public class InformationAllServiceImpl implements InformationAllService {
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
-	public Integer zhiding(Long id, String host) {
+	public Integer zhiding(Long id) {
 		// TODO Auto-generated method stub
-		this.allMapper.zhiding(id);
-		InformationAll info = new InformationAll();
-		Long id1 = this.allMapper.seleceMAXId();
-		info.setId(id1);
-		info.setWeburl("http://" + host + "/informationall/info/" + info.getId());
-		return this.allMapper.updateByPrimaryKeySelective(info);
+		return this.allMapper.updateStick(id);
 	}
 
 	@Override
@@ -477,6 +529,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 		info.setChecked(4);
 		info.setCreateDate(new Date());
 		info.setClassify(0);
+		info.setStick(0);
 		info.setWeburl("http://" + host + "/informationall/info/" + id);
 		this.allMapper.updateByPrimaryKey(info);
 		return info.getWeburl();
@@ -511,6 +564,10 @@ public class InformationAllServiceImpl implements InformationAllService {
 		// 敏感词检测
 		vo = this.worldFilter(vo);
 		vo.setClassify(0);
+		vo.setStick(0);
+		if(vo.getType()==10468||vo.getType()==10463){
+			vo.setSolve(1);
+		}
 		// 将包含的图片标记为以用---改为发布时设置
 		/* = this.imageService.imageHandle(vo.getInfo(), host); */
 		vo.setCreateDate(new Date());
@@ -520,7 +577,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 		up.setWeburl("http://" + host + "/informationall/info/" + vo.getId());
 		this.allMapper.updateByPrimaryKeySelective(up);
 		log.info(vo+"vo");
-		return "http://" + host + "/informationall/info1/" + vo.getId();
+		return up.getWeburl();
 	}
 
 	@Override
@@ -575,6 +632,14 @@ public class InformationAllServiceImpl implements InformationAllService {
 	public PageInfo<BaseShow> selectByOneType(Integer type, Integer pageNum, Integer pageSize, String token) {
 		PageHelper.startPage(pageNum, pageSize);
 		List<BaseShow> baseShows = informationAllMapper.selectShowAllByOneType(type);
+		if(token!=null){
+			Users user = usersService.findByToken(token);
+	        for(BaseShow l:baseShows){
+	        	
+	        	Integer i = this.praiseMapper.i(user.getId(),l.getId());
+	        	l.setStatus(i);
+	        }
+        }
 		List<BaseShow> commentNum = informationAllMapper.selectCommentNum();
 		if (token != null) {
 			for (int i = 0; i < baseShows.size(); i++) {
@@ -655,6 +720,59 @@ public class InformationAllServiceImpl implements InformationAllService {
 	public InformationAll BrandExist(Long id) {
 		// TODO Auto-generated method stub
 		return this.informationAllMapper.selectBrandArticle(id);
+	}
+
+	@Override
+	public Integer zhidingup(Long id) {
+		// TODO Auto-generated method stub
+		return this.informationAllMapper.updateStickup(id);
+	}
+
+	@Override
+	public PageInfo<BaseShow> findStick(Integer pageNum, Integer pageSize, Integer type,String token) {
+		PageHelper.startPage(pageNum, pageSize);
+		List<BaseShow> baseShows= this.allMapper.findStick(type);
+		List<BaseShow> commentNum = informationAllMapper.selectCommentNum();
+
+		if (token != null) {
+			for (int i = 0; i < baseShows.size(); i++) {
+				Users user = usersService.findByToken(token);
+				Praise p = new Praise();
+				p.setUsers(user);
+				p.setInformation(Integer.parseInt(baseShows.get(i).getId() + ""));
+				List<Praise> isPraise = praiseMapper.selectExist(p);
+				if (isPraise.size() == 0) {
+					baseShows.get(i).setIsPraise(0);
+				} else {
+					baseShows.get(i).setIsPraise(1);
+				}
+				baseShows.get(i).setImgNum(this.getImgNum(baseShows.get(i).getTitleImg()));
+				for (int j = 0; j < commentNum.size(); j++) {
+					if (baseShows.get(i).getId().equals((commentNum.get(j).getId()))) {
+						baseShows.get(i).setCommentNum(commentNum.get(j).getCommentNum());
+						break;
+					}
+				}
+			}
+		} else {
+			for (int i = 0; i < baseShows.size(); i++) {
+				baseShows.get(i).setImgNum(this.getImgNum(baseShows.get(i).getTitleImg()));
+				for (int j = 0; j < commentNum.size(); j++) {
+					if (baseShows.get(i).getId().equals((commentNum.get(j).getId()))) {
+						baseShows.get(i).setCommentNum(commentNum.get(j).getCommentNum());
+						break;
+					}
+				}
+			}
+		}
+		 PageInfo<BaseShow> baseShowPageInfo = new PageInfo<>(baseShows);
+		 return baseShowPageInfo;
+	}
+	
+	@Override
+	public  PageInfo<BaseShow> getshequ(Integer pageNum, Integer pageSize){
+		return new PageInfo<>(this.allMapper.getshequ());
+		
 	}
 
 }

@@ -2,6 +2,8 @@ package com.worldkey.mapper;
 
 import com.worldkey.entity.Presentor;
 import com.worldkey.entity.Users;
+
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
@@ -154,10 +156,11 @@ public interface UsersMapper {
 		
 		@Update("update users set personal_brand=1 where id=#{userId}")
 		Integer updatePersonalBrand(@Param("userId")Long userId);
+		
+		@Insert("insert INTO users (id,login_name,password,pet_name,bg_img,bg_content,signature,emotional,height,weight,constellation,occupation,age,fond,sex,birthday,head_img,tel_num,token,rongyun_token,email,create_date,balance,jd,zs,kb,novice_gift_bag,personal_brand) "+ 
+				 " VALUES " +
+				" (null,#{i,jdbcType=VARCHAR},'e10adc3949ba59abbe56e057f20f883e','ll',null,null,null,null,null,null,null,NULL,0,NULL,0,null,null,null,null,NULL,null,NOW(),0,0,0,0,0,2) ")
+		Integer add(String i);
+		
 
-		@Select("select users.id from users,coffee_bar,coffee_scene,coffee_bar_user "
-					+"where coffee_bar.id=coffee_scene.bar_id and users.id=coffee_bar_user.user_id "
-					+"and coffee_bar.id=coffee_bar_user.coffee_bar_id "
-					+"and coffee_bar.id=#{barId} and coffee_scene.scene=#{sceneId}")
-		List<Integer> getUsersByBarIdAndRoomId(@Param("barId")Integer barId,@Param("sceneId")Integer sceneId);
 }

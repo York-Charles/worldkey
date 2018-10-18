@@ -14,13 +14,14 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-
+import com.worldkey.entity.Comment;
 import com.worldkey.entity.CommentApp;
 import com.worldkey.entity.GiftRecordApp;
 import com.worldkey.entity.History;
 import com.worldkey.entity.PraiseApp;
 import com.worldkey.entity.ShareInfoRecordApp;
 import com.worldkey.entity.Users;
+import com.worldkey.mapper.CommentMapper;
 import com.worldkey.service.CommentService;
 import com.worldkey.service.GiftRecordService;
 import com.worldkey.service.HistoryService;
@@ -46,6 +47,8 @@ public class HistoryController {
 	ShareInfoRecordService shareInfoRecordService;
 	@Resource
 	CommentService commentService;
+	@Resource
+	CommentMapper commentMapper;
 
 	@RequestMapping(value = "history/{token}", method = RequestMethod.GET)
 	public ResultUtil pushHistory(@RequestParam(defaultValue = "1") Integer pageNum,
@@ -53,23 +56,26 @@ public class HistoryController {
 
 		Users user = this.usersService.findByToken(token);
 		Long userId = user.getId();
-		 List<GiftRecordApp> giftRecord = this.giftRecordService.gift(userId);
+//		 List<GiftRecordApp> giftRecord = this.giftRecordService.gift(userId);
 		List<PraiseApp> praise = this.praiseService.praise(userId);
 		List<ShareInfoRecordApp> shareInfoRecord = this.shareInfoRecordService.share(userId);
 		List<CommentApp> comment = this.commentService.comment(userId);
 		List<History> list = this.hService.selectHistory(userId);
 
-		 for (int i = 0; i < giftRecord.size(); i++) {
-		 History p = new History();
-		 p.setCreateTime(giftRecord.get(i).getCreateTime());
-		 p.setUserId(giftRecord.get(i).getUserId());
-		 p.setGiftName(giftRecord.get(i).getGiftName());
-		 p.setPetName(giftRecord.get(i).getPetName());
-		 p.setLoginName(giftRecord.get(i).getLoginName());
-		 p.setInformation(giftRecord.get(i).getToInformation());
-		 p.setClassify(2);
-		 list.add(p);
-		 }
+//		 for (int i = 0; i < giftRecord.size(); i++) {
+//		 History p = new History();
+//		 p.setCreateTime(giftRecord.get(i).getCreateTime());
+//		 p.setUserId(giftRecord.get(i).getUserId());
+//		 p.setGiftName(giftRecord.get(i).getGiftName());
+//		 p.setPetName(giftRecord.get(i).getPetName());	 
+//		 p.setLoginName(giftRecord.get(i).getLoginName());
+//		 p.setInformation(giftRecord.get(i).getToInformation());
+//		 p.setClassify(2);
+//		 list.add(p);
+//		 }
+		 
+		 
+		 if(praise!=null){
 		for (int i = 0; i < praise.size(); i++) {
 			History p = new History();
 			p.setCreateTime(praise.get(i).getCreateTime());
@@ -83,7 +89,7 @@ public class HistoryController {
 			p.setWebUrl(praise.get(i).getWebUrl());
 			p.setClassify(0);
 			list.add(p);
-		}
+		}}
 		for (int i = 0; i < shareInfoRecord.size(); i++) {
 			History p = new History();
 			p.setCreateTime(shareInfoRecord.get(i).getCreateTime());
@@ -111,8 +117,13 @@ public class HistoryController {
 			p.setTitleImg(comment.get(i).getTitleImg());
 			p.setWebUrl(comment.get(i).getWebUrl());
 			p.setClassify(1);
+
+			p.setMark(comment.get(i).getSize());
+			
 			list.add(p);
 		}
+		
+
 		for (int i = 0; i < list.size(); i++) {
 			for (int j = i; j < list.size(); j++) {
 				History temp = list.get(i);
@@ -122,6 +133,18 @@ public class HistoryController {
 				}
 			}
 		}
+		
+		for(History list1:list){
+			if(list1.getClassify()==7){
+				List<Comment> comments = this.commentMapper.getReplyPraise(Long.parseLong(list1.getToCommentId()+""));
+				for(Comment s:comments){
+					list1.setMark(comments.indexOf(s));
+				}
+				
+			}
+		}
+		
+		
 		int pageCount = 0;
 		if(list.size()%pageSize==0){
 			pageCount=list.size()/pageSize;

@@ -11,6 +11,7 @@ import io.rong.models.TokenResult;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author HP
@@ -29,16 +30,24 @@ public interface FriendService {
 
     int delFriend(Friend friend);
     
-    int record(String userId,String toUsersID,String message);
+    
+//    int record(String userId,String toUsersID,String message);
     List<Record> select(String toUserId);
     
-    List<Integer> enlopeRequest(Users user,String type,String message,String... toUserId);
+    Long selectUserId(String loginName);
     
-    String elopeHandler(Users user,String type,String message,String... toUserId);
+    
+   List<Integer> enlopeRequest(Users user,String type,String message,String... toUserId);
+    
+    Map<String,Object> elopeHandler(Users user, String type, String message, String... toUserId);
     
     PrivateRequest infoCheck(String reqName, String message,String... toUserId);
 	
 	void infoCheck1(Users user,Users user1);
 	
 	void dissPeople(Users user,Users user1);
+
+	void barrage(String userName,String message,String icon,String type,String... toUserId);
+
+    Integer giftUsers(String token,Integer giftId,Long userId,String... toUserId);
 }

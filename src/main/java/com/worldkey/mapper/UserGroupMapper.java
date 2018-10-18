@@ -31,5 +31,6 @@ public interface UserGroupMapper {
 	
 	@Delete("delete from user_group where user_id=#{userId} and group_id=#{groupId}")
 	Integer delMember(UserGroup userGroup);
+	
 
 }

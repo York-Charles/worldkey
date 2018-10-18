@@ -169,4 +169,7 @@ public interface ThreeTypeMapper extends BaseMapper<ThreeType> {
 				"on users.id=user_group.user_id "+
 				"where users.id=#{userId} and three_type.checked=1 and three_type.user_id!=#{userId} order by three_type.id desc")	
 		List<ThreeType> findJoinedGroup(Integer userId);
+		
+		@Select("SELECT * FROM three_type WHERE type_name LIKE concat('%',#{name},'%') and two_type=226")
+		List<ThreeType> findXiaozu(String name);
 }

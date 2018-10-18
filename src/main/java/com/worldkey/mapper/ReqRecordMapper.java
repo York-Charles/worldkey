@@ -31,6 +31,9 @@ public interface ReqRecordMapper {
 	
 	@Select("select id,create_date,bar_id,req_id,is_reqId from req_record where (is_reqId=#{isId} or req_id=#{isId}) and ifsuc=0")
 	ReqRecord selectByIsReqId(Long isId);
+
+	@Select("select count(id) from req_record where (is_reqId=#{isId} or req_id=#{isId}) and ifsuc=0")
+	Integer selectByIsReqId2(Long isId);
 	
 	@Select("select id,create_date,bar_id,req_id,is_reqId from req_record where (is_reqId=#{isId} or req_id=#{isId}) and ifsuc=1")
 	ReqRecord selectByIsReqId1(Integer isId);

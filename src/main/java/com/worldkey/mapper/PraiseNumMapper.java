@@ -1,4 +1,5 @@
 package com.worldkey.mapper;
+import com.worldkey.entity.Praise;
 import com.worldkey.entity.PraiseNum;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -24,5 +25,9 @@ public interface PraiseNumMapper {
      */
     @Select("select praise_num_id as praiseNumId from praise_num as praiseNum where information=#{informationId} ")
     Long selectPKByinfo(@Param("informationId") Integer informationId);
+    
+    
+    @Select("select praise_num from praise_num where information = #{information}")
+    Integer p(Integer information);
 
 }

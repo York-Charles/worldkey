@@ -621,7 +621,7 @@ public class ShowController {
 ////				 }
 ////			 }else{
 //				 Integer ii=this.informationAllService.compileto(id, title,titleImgs, info);	 
-////			 }
+//			 }
 //	        int i = informationAllMapper.issue(id);
 //			if(i != 0){
 //				return new ResultUtil(200, "OK", "发布成功");

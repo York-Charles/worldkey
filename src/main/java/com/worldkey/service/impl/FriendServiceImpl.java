@@ -414,7 +414,7 @@ public class FriendServiceImpl extends ServiceImpl<GiftMapper, Gift> implements 
 			jdDetailService.insertBatch(jdDetails);
 			// 记录礼物赠送记录
 			GiftUsers giftUsers = new GiftUsers(new Date(), users.getId(), userId, giftId);
-			boolean insert = giftUsersMapper.insert(giftUsers);
+			boolean insert = giftUsersMapper.insertBarGift(giftUsers);
 			// 成功返回3，插入失败返回4
 			return this.Bestowed(insert,users,users1,giftId,toUserId);
 		}
@@ -445,7 +445,7 @@ public class FriendServiceImpl extends ServiceImpl<GiftMapper, Gift> implements 
 			kbDetailService.insert(kbDetail);
 			// 记录礼物赠送记录
 			GiftUsers giftUsers = new GiftUsers(new Date(), users.getId(), userId, giftId);
-			boolean insert = giftUsersMapper.insert(giftUsers);
+			boolean insert = giftUsersMapper.insertBarGift(giftUsers);
 			// 成功返回3，插入失败返回4
 			return this.Bestowed(insert,users,users1,giftId,toUserId);
 		}

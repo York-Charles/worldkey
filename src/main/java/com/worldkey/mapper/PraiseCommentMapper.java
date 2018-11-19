@@ -1,5 +1,6 @@
 package com.worldkey.mapper;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -39,7 +40,10 @@ public interface PraiseCommentMapper {
 
 	    @Update("update praise_comment set status = #{status} where id=#{id} ")
 	    int updateByPrimaryKey(@Param("status") Integer status ,@Param("id")Long id);
-
+	    
+	    
+	    @Delete("delete from praise_comment where comment = #{b}")
+	    int deleteC(Long b);
 		
 
 }

@@ -241,4 +241,16 @@ public class PraiseServiceImpl implements PraiseService {
 		}
 		return praiseApp;
 	}
+
+	@Override
+	public int deleteInformaiton(Integer id) {
+		int i = this.praiseMapper.deleteInformaiton(id);
+		return i;
+	}
+
+	@Override
+	public int deleteInformaitonNum(Integer id) {
+		int i = this.praiseNumMapper.deleteInformaiton(id);
+		return i;
+	}
 }

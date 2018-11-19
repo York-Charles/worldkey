@@ -37,5 +37,8 @@ public interface PraiseService {
     
     //5.18根据ID查找所有文章的所有操作
     List<PraiseApp> praise(Long userId);
+    
+    int deleteInformaiton(Integer id);
+    int deleteInformaitonNum(Integer ids);
 
 }

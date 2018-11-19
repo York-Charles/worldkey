@@ -54,8 +54,14 @@ public class InformationAll implements Serializable {
 	 * 个人品牌展示文章
 	 */
 	private Integer userBrand;
-	//bug反馈
+	//bug反馈1待处理 2已答复 3处理中 4请补充 5已收录 6已解决
 	private Integer solve;
+	
+	//删除状态0存在1已删除
+	private Integer state;
+	
+	//草稿 0 草稿 1非草稿
+		private Integer draft;
 
 	private static final long serialVersionUID = 1L;
 

@@ -173,6 +173,6 @@ public interface CommentMapper {
     @Select("select praise_num from praise_comment_num where comment=#{comment}")
     Integer praiseNum(Long comment);
     
-    
-
+    @Select("select comment_id from comment where information=#{id}")
+    List<Long> selectInformation(Long id);
 }

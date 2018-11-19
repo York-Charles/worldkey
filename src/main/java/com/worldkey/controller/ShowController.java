@@ -3,6 +3,7 @@ package com.worldkey.controller;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.worldkey.entity.*;
+import com.worldkey.mapper.InformationAllMapper;
 import com.worldkey.service.InformationAllService;
 import com.worldkey.service.OneTypeService;
 import com.worldkey.service.ThreeTypeService;
@@ -43,6 +44,8 @@ public class ShowController {
 	private OneTypeService oneTypeService;
 	@Resource
 	private ThreeTypeService threeTypeService;
+	@Resource
+	private InformationAllMapper informationAllMapper;
 
 	/**
 	 * 展示推送到生态系统
@@ -139,9 +142,17 @@ public class ShowController {
 		if (threeType == null) {
 			return new ResultUtil(200, "no", "分类不存在");
 		}
-		InformationAll informationAll = new InformationAll(title, titleImgs, threeType.getId(), user.getPetName(), 0,
-					user, 4, info);
+		 SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+	        String dir = format.format(new Date());
+		String titleImgs1 = titleImgs.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image/"+dir+"/");
+		String info1 = info.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image/"+dir+"/");
+		info1 = info1.replace("<img ", "<br><img ");
+		info1 = info1.replace("\"/>", "\"/><br>");
+		InformationAll informationAll = new InformationAll(title, titleImgs1, threeType.getId(), user.getPetName(), 0,
+					user, 4, info1);
 		informationAll.setStick(0);
+		informationAll.setState(0);
+		informationAll.setDraft(1);
 		String add = this.informationAllService.add1(informationAll, host);
 		// 发布成功
 		if (add != null) {
@@ -151,6 +162,44 @@ public class ShowController {
 		return new ResultUtil(200, "ok", "发布失败");
 	}
 	
+//	/**
+//	 * 发布展示 测试
+//	 */
+//	@RequestMapping("release")
+//	public ResultUtil release(String token, @RequestHeader("host") String host, String typeName, String info,
+//			String title, String titleImgs) {
+//		Users user = usersService.findByToken(token);
+//		// 未登录
+//		if (user == null) {
+//			return new ResultUtil(200, "no", "未登录");
+//		}
+//		TwoType twoType = twoTypeService.findByTypeName(typeName);
+//		// 4.18
+//		ThreeType threeType = threeTypeService.findByTypeName(typeName);
+//		// 发布的分类不存在
+//		if (threeType == null) {
+//			return new ResultUtil(200, "no", "分类不存在");
+//		}
+//		 SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+//	        String dir = format.format(new Date());
+//		String titleImgs1 = titleImgs.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image-test/"+dir+"/");
+//		String info1 = info.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image-test/"+dir+"/");
+//		info1 = info1.replace("<img ", "<br><img ");
+//		info1 = info1.replace("\"/>", "\"/><br>");
+//		InformationAll informationAll = new InformationAll(title, titleImgs1, threeType.getId(), user.getPetName(), 0,
+//					user, 4, info1);
+//		informationAll.setStick(0);
+//		informationAll.setState(0);
+//		informationAll.setDraft(1);
+//		String add = this.informationAllService.add1(informationAll, host);
+//		// 发布成功
+//		if (add != null) {
+//			return new ResultUtil(200, "ok", add);
+//		}
+//		// 发布失败 一般不会发生
+//		return new ResultUtil(200, "ok", "发布失败");
+//	}
+//	
 	@RequestMapping("release1")
 	public ResultUtil release1(String token, @RequestHeader("host") String host, String typeName, String info,
 			String title, String titleImgs) {
@@ -170,6 +219,8 @@ public class ShowController {
 					user, 4, info,1);
 		informationAll.setUserBrand(1);
 		informationAll.setStick(0);
+		informationAll.setState(0);
+		informationAll.setDraft(1);
 		String add = this.informationAllService.add1(informationAll, host);
 		// 发布成功
 		if (add != null) {
@@ -251,6 +302,7 @@ public class ShowController {
 		ThreeType threeType = threeTypeService.findByTypeName(typeName);
 		info.setType(threeType.getId());
 		info.setStick(0);
+		info.setState(0);
 		if(threeType.getId()==10468||threeType.getId()==10463){
 			info.setSolve(1);
 		}
@@ -267,6 +319,7 @@ public class ShowController {
 		MultipartHttpServletRequest params = ((MultipartHttpServletRequest) request);
 		String typeName = params.getParameter("typeName");
 		String title = params.getParameter("title");
+		log.info(title+"--------------------------------------");
 		String titleImg = "";
 		String info = "";
 		String realPath = "";
@@ -281,7 +334,6 @@ public class ShowController {
 				try {
 					realPath = new FileUploadUtilAsync().getFileName(request.getHeader("host"), infoImg);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				String streo = changeToHtml(realPath);
@@ -346,6 +398,237 @@ public class ShowController {
 		// 发布失败 一般不会发生
 		return new ResultUtil(500, "ok", "修改失败");
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * 文章草稿箱
+	 */
+	@RequestMapping("draft")
+	public ResultUtil draft(String token, @RequestHeader("host") String host, String typeName, String info,
+			String title, String titleImgs) {
+		Users user = usersService.findByToken(token);
+		// 未登录
+		if (user == null) {
+			return new ResultUtil(200, "no", "未登录");
+		}
+		TwoType twoType = twoTypeService.findByTypeName(typeName);
+		// 4.18
+		ThreeType threeType = threeTypeService.findByTypeName(typeName);
+		// 发布的分类不存在
+		if (threeType == null) {
+			return new ResultUtil(200, "no", "分类不存在");
+		}
+		 SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+	        String dir = format.format(new Date());
+		String titleImgs1 = titleImgs.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image/"+dir+"/");
+		String info1 = info.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image/"+dir+"/");
+		info1 = info1.replace("<img ", "<br><img ");
+		info1 = info1.replace("\"/>", "\"/><br>");
+		InformationAll informationAll = new InformationAll(title, titleImgs1, threeType.getId(), user.getPetName(), 0,
+					user, 4, info1);
+		informationAll.setStick(0);
+		informationAll.setState(0);
+		informationAll.setDraft(0);
+		String add = this.informationAllService.add1(informationAll, host);
+		// 发布成功
+		if (add != null) {
+			return new ResultUtil(200, "ok", add);
+		}
+		// 发布失败 一般不会发生
+		return new ResultUtil(200, "ok", "发布失败");
+	}
+	
+//	/**
+//	 * 文章草稿箱 测试
+//	 */
+//	@RequestMapping("draft")
+//	public ResultUtil draft(String token, @RequestHeader("host") String host, String typeName, String info,
+//			String title, String titleImgs) {
+//		Users user = usersService.findByToken(token);
+//		// 未登录
+//		if (user == null) {
+//			return new ResultUtil(200, "no", "未登录");
+//		}
+//		TwoType twoType = twoTypeService.findByTypeName(typeName);
+//		// 4.18
+//		ThreeType threeType = threeTypeService.findByTypeName(typeName);
+//		// 发布的分类不存在
+//		if (threeType == null) {
+//			return new ResultUtil(200, "no", "分类不存在");
+//		}
+//		 SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+//	        String dir = format.format(new Date());
+//		String titleImgs1 = titleImgs.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image-test/"+dir+"/");
+//		String info1 = info.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image-test/"+dir+"/");
+//		info1 = info1.replace("<img ", "<br><img ");
+//		info1 = info1.replace("\"/>", "\"/><br>");
+//		InformationAll informationAll = new InformationAll(title, titleImgs1, threeType.getId(), user.getPetName(), 0,
+//					user, 4, info1);
+//		informationAll.setStick(0);
+//		informationAll.setState(0);
+//		informationAll.setDraft(0);
+//		String add = this.informationAllService.add1(informationAll, host);
+//		// 发布成功
+//		if (add != null) {
+//			return new ResultUtil(200, "ok", add);
+//		}
+//		// 发布失败 一般不会发生
+//		return new ResultUtil(200, "ok", "发布失败");
+//	}
+	
+	// 我的草稿箱
+	@RequestMapping("/find/draft")
+	public ResultUtil findthree(@RequestParam(value = "page", defaultValue = "1") Integer pageNum,
+			@RequestParam(value = "pageSize", defaultValue = "10") Integer pageSize, Long userId) {
+		PageHelper.startPage(pageNum, pageSize);
+		List<BaseShow> baseShows = informationAllMapper.findDraft(userId);
+		PageInfo<BaseShow> baseShowPageInfo = new PageInfo<>(baseShows);
+		return new ResultUtil(200, "ok", baseShowPageInfo);
+	}
+	
+	
+	/*
+	 * 说说草稿箱
+	 * 
+	 */
+	@RequestMapping(value="addShuoDraft",method=RequestMethod.POST)
+	public ResultUtil addShuoDraft(String token, 
+			@RequestHeader("host") String host, 
+			HttpServletRequest request,@RequestParam(defaultValue="-1") Integer imgNum){
+		Users user = usersService.findByToken(token);
+		MultipartHttpServletRequest params = ((MultipartHttpServletRequest) request);
+		String typeName = params.getParameter("typeName");
+		String title = params.getParameter("title");
+		String titleImg = "";
+		String info = "";
+		String realPath = "";
+		if (imgNum>=0) {
+			for (int i = 0; i < imgNum; i++) {
+				MultipartFile infoImg = params.getFile("info" + i);
+				String[] allowedType = { "image/bmp", "image/gif", "image/jpeg", "image/png","image/jpg" };
+				boolean allowed = Arrays.asList(allowedType).contains(infoImg.getContentType());
+				if (!allowed) {
+					return new ResultUtil(200, "ok", "error|不支持的类型");
+				}
+				try {
+					realPath = new FileUploadUtilAsync().getFileName(request.getHeader("host"), infoImg);
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				String streo = changeToHtml(realPath);
+				info = info + streo;
+				titleImg = titleImg +"," +realPath;
+			}
+			titleImg = titleImg.substring(1, titleImg.length());
+		}
+
+		// 未登录
+		if (user == null) {
+			return new ResultUtil(200, "no", "未登录");
+		}
+		// 4.18
+		ThreeType threeType = threeTypeService.findByTypeName(typeName);
+		// 发布的分类不存在
+		if (threeType == null) {
+			return new ResultUtil(200, "no", "分类不存在");
+		}
+
+		InformationAll informationAll = new InformationAll(title, titleImg, threeType.getId(), user.getPetName(), 0,
+				user, 4, info);
+		String add = this.informationAllService.addShuo(informationAll, host);
+		// 发布成功
+		if (add != null) {
+			return new ResultUtil(200, "ok", add);
+		}
+		// 发布失败 一般不会发生
+		return new ResultUtil(200, "ok", "发布失败");
+	}
+	
+	
+	
+	/**
+	 * 查找自己的说说草稿箱
+	 */
+	@RequestMapping("findshuoshuoDraft/list")
+	public @ResponseBody ResultUtil findshuoshuoDraft(Long userId, @RequestParam(defaultValue = "1") Integer page,
+			@RequestParam(defaultValue = "10") Integer pageSize) {
+		if (userId == null) {
+			return new ResultUtil(406, "no", "用户编号不能为空");
+		}
+		return new ResultUtil(200, "ok", this.informationAllService.findShuoshuoDraft(userId,page,pageSize));
+	}	
+	
+	
+	//删除草稿箱
+		@RequestMapping("deleteDraft")
+		public ResultUtil deleteDraft(Long id) {
+			int i = informationAllMapper.deleteDraft(id);
+			if(i != 0){
+				return new ResultUtil(200, "OK", "删除成功");
+			}
+			return new ResultUtil(200, "OK", "删除失败");
+		}
+		
+	
+	//草稿箱发布
+		@RequestMapping("issue")
+		public ResultUtil issue(Long id,String title,String titleImg,String info1,@RequestHeader("host") String host){
+//			InformationAll informationa = informationAllMapper.selectByPrimaryKey1(id);
+			SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+	        String dir = format.format(new Date());
+			String info = info1.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image/"+dir+"/");
+			 String titleImgs = titleImg.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image/"+dir+"/");
+			 info1 = info1.replace("<img ", "<br><img ");
+				info1 = info1.replace("\"/>", "\"/><br>");
+//	        if(title.equals(informationa.getTitle())){
+//				 if(titleImgs.equals(informationa.getTitleImg())){
+//					 if(info.equals(informationa.getInfo())){
+//						 int i = informationAllMapper.issue(id);
+//					 }
+//				 }
+//			 }else{
+				 Integer ii=this.informationAllService.compileto(id, title,titleImgs, info);	 
+//			 }
+	        int i = informationAllMapper.issue(id);
+			if(i != 0){
+				return new ResultUtil(200, "OK", "发布成功");
+			}
+			return new ResultUtil(200, "OK", "发布失败");
+		}
+	
+//		//草稿箱发布 测试
+//		@RequestMapping("issue")
+//		public ResultUtil issue(Long id,String title,String titleImg,String info1,@RequestHeader("host") String host){
+////			InformationAll informationa = informationAllMapper.selectByPrimaryKey1(id);
+//			SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
+//	        String dir = format.format(new Date());
+//			String info = info1.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image-test/"+dir+"/");
+//			 String titleImgs = titleImg.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "http://"+host+"/image-test/"+dir+"/");
+//			 info1 = info1.replace("<img ", "<br><img ");
+//				info1 = info1.replace("\"/>", "\"/><br>");
+////	        if(title.equals(informationa.getTitle())){
+////				 if(titleImgs.equals(informationa.getTitleImg())){
+////					 if(info.equals(informationa.getInfo())){
+////						 int i = informationAllMapper.issue(id);
+////					 }
+////				 }
+////			 }else{
+//				 Integer ii=this.informationAllService.compileto(id, title,titleImgs, info);	 
+////			 }
+//	        int i = informationAllMapper.issue(id);
+//			if(i != 0){
+//				return new ResultUtil(200, "OK", "发布成功");
+//			}
+//			return new ResultUtil(200, "OK", "发布失败");
+//		}
+//	
 
 	private String changeToHtml(String s) {
 		StringBuilder sb = new StringBuilder("<img src=\"");

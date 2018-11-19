@@ -133,6 +133,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 		vo.setCreateDate(new Date());
 		vo.setClassify(1);
 		vo.setStick(0);
+		vo.setState(0);
 		this.allMapper.insertSelective(vo);
 		Long id = this.allMapper.seleceMAXId();
 		InformationAll info = this.allMapper.selectLastButOne();
@@ -171,6 +172,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 		vo.setCreateDate(new Date());
 		vo.setClassify(1);
 		vo.setStick(0);
+		vo.setState(0);
 		this.allMapper.insertSelective(vo);
 		InformationAll up = new InformationAll();
 		up.setId(vo.getId());
@@ -182,6 +184,18 @@ public class InformationAllServiceImpl implements InformationAllService {
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
 	public Integer showPush(Long itemID, Integer type, String host) {
+		InformationAll info = this.allMapper.selectByPrimaryKey(itemID);
+		info.setType(type);
+		info.setId(null);
+		info.setChecked(1);
+		info.setShowPush(1);
+		this.allMapper.updateShowPush(itemID, 1);
+		return this.add(info, host);
+	}
+	
+	@Override
+	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
+	public Integer showPush1(Long itemID, Integer type, String host) {
 		InformationAll info = this.allMapper.selectByPrimaryKey(itemID);
 		info.setType(type);
 		info.setId(null);
@@ -248,7 +262,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 	 * @return InformationAll对象
 	 */
 	@Override
-	@Cacheable(value = "info", key = "'InformationAll'+#id")
+//	@Cacheable(value = "info", key = "'InformationAll'+#id")
 	@Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRED)
 	public InformationAll info(Long id) {
 		this.allMapper.addPointNumber(id);
@@ -257,7 +271,7 @@ public class InformationAllServiceImpl implements InformationAllService {
 
 	@Override
 	@Transactional(rollbackFor = Exception.class)
-	@Cacheable(value = "info", key = "'InformationAll'+#itemID")
+//	@Cacheable(value = "info", key = "'InformationAll'+#itemID")
 	public InformationAll info(Long itemID, Long userID) {
 		// 查看是否浏览过本条记录
 		BrowsingHistory bh = this.browsingHistoryService.findByUserAndItem(itemID, userID);
@@ -502,6 +516,14 @@ public class InformationAllServiceImpl implements InformationAllService {
 		PageInfo<BaseShow> baseShowPageInfo = new PageInfo<>(baseShows);
 		return baseShowPageInfo;
 	}
+	
+	@Override
+	public PageInfo<BaseShow> findShuoshuoDraft(Long userId, Integer pageNum, Integer pageSize) {
+		PageHelper.startPage(pageNum, pageSize, true);
+		List<BaseShow> baseShows = this.allMapper.selectByclassifyDraft(userId);
+		PageInfo<BaseShow> baseShowPageInfo = new PageInfo<>(baseShows);
+		return baseShowPageInfo;
+	}
 
 	@Override
 	@Transactional(propagation = Propagation.REQUIRED, rollbackFor = Exception.class)
@@ -565,6 +587,8 @@ public class InformationAllServiceImpl implements InformationAllService {
 		vo = this.worldFilter(vo);
 		vo.setClassify(0);
 		vo.setStick(0);
+		vo.setState(0);;
+		vo.setDraft(1);
 		if(vo.getType()==10468||vo.getType()==10463){
 			vo.setSolve(1);
 		}
@@ -579,6 +603,53 @@ public class InformationAllServiceImpl implements InformationAllService {
 		log.info(vo+"vo");
 		return up.getWeburl();
 	}
+	
+	
+	
+	@Override
+	public String addShuoDraft(InformationAll vo, String host) {
+		/*
+		 * //判定是否草稿 boolean isDraftBox = Objects.equals(vo.getChecked(), 2);
+		 * //判定是否展示板块内容 boolean isDraftBox4 = Objects.equals(vo.getChecked(),
+		 * 4); if (isDraftBox4) { //添加发布奖励金豆部分 String format =
+		 * simpleDateFormat.format(new Date()); Integer integer =
+		 * this.allMapper.selectBetweenCreateDate(format,
+		 * vo.getUsers().getId()); if (integer <
+		 * systemProperties.getReleaseAwardsFrequency()) { //添加用户的发布奖励
+		 * this.usersService.addJd(systemProperties.getReleaseAwardsJd(),
+		 * vo.getUsers().getId()); //记录用户的发布奖励金豆明细 JdDetail jdDetail = new
+		 * JdDetail(new Date(), systemProperties.getReleaseAwardsJd(),
+		 * JdRewardType.releaseReward.getIndex(), vo.getUsers().getId(), null,
+		 * null); jdDetail.setMsg("发布获得" + systemProperties.getReleaseAwardsJd()
+		 * + "金豆"); this.jdDetailMapper.insert(jdDetail); } } //判定是否是展示推送的内容
+		 * boolean isDraftBox1 = Objects.equals(vo.getChecked(), 1);
+		 * //不是上三类就一数据库默认值为初始值 if (!isDraftBox && !isDraftBox4 && !isDraftBox1)
+		 * { vo.setChecked(null); }
+		 */
+		// 敏感词检测
+		vo = this.worldFilter(vo);
+		vo.setClassify(0);
+		vo.setStick(0);
+		vo.setState(0);
+		vo.setDraft(0);
+		if(vo.getType()==10468||vo.getType()==10463){
+			vo.setSolve(1);
+		}
+		// 将包含的图片标记为以用---改为发布时设置
+		/* = this.imageService.imageHandle(vo.getInfo(), host); */
+		vo.setCreateDate(new Date());
+		this.allMapper.insertSelective(vo);
+		InformationAll up = new InformationAll();
+		up.setId(vo.getId());
+		up.setWeburl("http://" + host + "/informationall/info/" + vo.getId());
+		this.allMapper.updateByPrimaryKeySelective(up);
+		log.info(vo+"vo");
+		return up.getWeburl();
+	}
+	
+	
+	
+	
 
 	@Override
 	public PageInfo<BaseShow> getShuoComponent(Integer type, Integer pageNum, Integer pageSize, String token) {
@@ -774,5 +845,32 @@ public class InformationAllServiceImpl implements InformationAllService {
 		return new PageInfo<>(this.allMapper.getshequ());
 		
 	}
+
+	@Override
+	public Integer deleteInformation(Long id) {
+		
+		return this.informationAllMapper.deleteInformation(id);
+	}
+	
+	@Override
+	public String findTitle(Long id) {
+		return this.informationAllMapper.findTitle(id);
+	}
+	
+	@Override
+	public String findInfo(Long id) {		
+		return this.informationAllMapper.findInfo(id);
+	}
+	
+	@Override
+	public Integer compileto(Long id,String title,String titleImgs,String info) {		
+		return this.informationAllMapper.compileto(id, title,titleImgs, info);
+	}
+
+	@Override
+	public List<BaseShow> myCreate(Long id) {
+		return this.informationAllMapper.myCreate(id);
+	}
+	
 
 }

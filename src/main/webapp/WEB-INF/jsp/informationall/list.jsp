@@ -117,9 +117,9 @@
                             data-target="#typeChange">
                         移动
                     </button>
-                    <button data-id="${c.id}" type="button" class="move btn-sm  btn btn-warning" data-toggle="modal"
+            <!--        <button data-id="${c.id}" type="button" class="move btn-sm  btn btn-warning" data-toggle="modal"
                         data-target="#move"><c:if test="${c.showPush!=0}"></c:if>精选
-                </button>
+                </button>           --> 
                 </td>
                 <td>
                     <select id="${c.id}" class="checked form-control" title="">

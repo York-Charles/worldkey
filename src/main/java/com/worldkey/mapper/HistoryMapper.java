@@ -16,5 +16,8 @@ public interface HistoryMapper {
 	
 	@Select("select * from history where user_id=#{id} order by create_time desc ")
 	List<History> selectHistory(Long id);
+	
+	@Delete("delete from history where information=#{id} and (classify=7 or classify=8)")
+	int deleteInformation(Long id);
 
 }

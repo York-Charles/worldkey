@@ -64,7 +64,11 @@
         #follow{
             float: right;
         }
-        
+        pre {
+			white-space: pre-wrap!important;
+			word-break:break-all!important;
+			*white-space:normal!important;
+		}
     </style>
 </head>
 <body>
@@ -76,9 +80,9 @@
    
    <%-- <button id="follow">关注</button>--%>
 </div>
-<div style=" height: 30px; font-size: 15px;line-height:1.5;display:inline-block;">${info.title}</div>
+<div style=" height: 30px; font-size: 15px;line-height:1.5;display:inline-block;"><pre>${info.title}</pre></div>
 <br></br>
-<div style=" height: 40px; font-size: 14px;line-height:2.2;display:inline-block;">${info.info}</div>
+<div style=" height: 40px; font-size: 14px;line-height:2.2;display:inline-block;"><pre>${info.info}</pre></div>
 
 
 

@@ -26,7 +26,7 @@
         <result column="info" property="info" jdbcType="LONGVARCHAR"/>
     </resultMap>
     <sql id="Base_Column_List">
-        id, create_date, title, title_img, type, weburl, abstracte, auther, point_number, checked, users,classify,competitive,user_brand,stick,stick_date,solve
+        id, create_date, title, title_img, type, weburl, abstracte, auther, point_number, checked, users,classify,competitive,user_brand,stick,stick_date,solve,state,draft
     </sql>
     <sql id="Blob_Column_List">
         info
@@ -85,6 +85,8 @@
                     )
             )
             AND i.users = #{userId,jdbcType=INTEGER}
+            AND i.state=0
+            AND i.draft=1
         ORDER BY i.create_date DESC
     </select>
 <!-- 4.23修改three_type 99行 -->
@@ -109,6 +111,8 @@
                     t.type_name = #{twoTypeName,jdbcType=VARCHAR}
             )
             AND i.users = #{userId,jdbcType=INTEGER}
+            AND i.state=0
+            AND i.draft=1
         ORDER BY i.create_date DESC
     </select>
     <select id="selectByPermaryKeys" resultMap="BaseShowResultMap">
@@ -136,7 +140,7 @@
         FROM
         information_all AS i
         LEFT JOIN praise_num AS pm ON i.id = pm.information
-        where checked=1 AND i.id in
+        where checked=1 AND state=0 AND i.draft=1 AND i.id in
         <foreach collection="list" index="ids" item="item" close=")" separator="," open="(">
             #{item}
         </foreach>
@@ -176,6 +180,12 @@
             </if>
             <if test="checked==2">
                 AND i.checked =2
+            </if>
+            <if test="state!=0">
+                AND i.state =0
+            </if>
+            <if test="draft!=1">
+                AND i.draft =1
             </if>
         </where>
         ORDER BY
@@ -221,6 +231,8 @@
         <include refid="Base_Column_List"/>
         from information_all
         where type = #{type,jdbcType=INTEGER}
+        and state=0
+        and draft=1
         order by id desc
     </select>
     <select id="selectBySelective" resultMap="BaseResultMap" parameterType="com.worldkey.entity.InformationAll">
@@ -249,7 +261,7 @@
         ,
         <include refid="Blob_Column_List"/>
         from information_all
-        where id = #{id,jdbcType=INTEGER}
+        where id = #{id,jdbcType=INTEGER}  and state=0 and draft=1
     </select>
     <select id="selectById" resultType="com.worldkey.entity.InformationExample" parameterType="java.lang.Long">
         select
@@ -339,6 +351,12 @@
              <if test="solve != null">
                 solve,
             </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="draft != null">
+                draft,
+            </if>
         </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="id != null">
@@ -394,6 +412,12 @@
             </if>
              <if test="solve != null">
                #{solve,jdbcType=INTEGER},
+            </if>
+            <if test="state != null">
+               #{state,jdbcType=INTEGER},
+            </if>
+            <if test="draft != null">
+               #{draft,jdbcType=INTEGER},
             </if>
         </trim>
     </insert>

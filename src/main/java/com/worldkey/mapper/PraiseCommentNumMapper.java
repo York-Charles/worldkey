@@ -1,5 +1,6 @@
 package com.worldkey.mapper;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -23,5 +24,6 @@ public interface PraiseCommentNumMapper {
     @Select("select praise_num from praise_comment_num where comment=#{commentId}")
     int selectPraiseNum(Integer commentId);
 
-
+    @Delete("delete from praise_comment_num where comment=#{commentId}")
+    int deleteComment(Integer commentId);
 }

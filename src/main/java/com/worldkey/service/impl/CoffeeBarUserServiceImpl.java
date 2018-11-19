@@ -78,7 +78,7 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 			}
 		};
 		List<String> appell = null;
-		if (sex == 1) {
+		if (sex == 0) {
 			appell = appellation.subList(0, 5);
 		} else {
 			appell = appellation.subList(5, 10);

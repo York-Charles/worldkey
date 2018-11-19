@@ -31,7 +31,7 @@ public class Users implements Serializable {
     private String password;
     @Pattern(regexp = "^[\\u4e00-\\u9fa5_a-zA-Z0-9]{1,16}$", groups = {ChangeInfo.class, UserReg.class})
     private String petName;
-    //1为男，0为女
+    //0为男，1为女
     @Min(value = 0, message = "只能为0(女)或1(男)", groups = {UserReg.class, ChangeInfo.class})
     @Max(value = 1, message = "只能为0(女)或1(男)", groups = {UserReg.class, ChangeInfo.class})
     private Integer sex;

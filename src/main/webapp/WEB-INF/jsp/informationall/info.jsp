@@ -64,14 +64,26 @@
         #follow{
             float: right;
         }
+        pre {
+
+		white-space: pre-wrap;       /* css-3 */
+		white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+		white-space: -pre-wrap;      /* Opera 4-6 */
+		white-space: -o-pre-wrap;    /* Opera 7 */
+		word-wrap: break-word;       /* Internet Explorer 5.5+ */
+		word-break:break-all;
+		overflow:hidden;
+
+		}
         
     </style>
 </head>
 <body>
 
-<div style=" height: 30px; font-size: 15px;line-height:1.5;display:inline-block;">${info.title}</div>
+<div style=" height: 30px; font-size: 15px;line-height:1.5;display:inline-block;"><pre>${info.title}</pre></div>
 <br></br>
-<div style=" height: 40px; font-size: 14px;line-height:2.2;display:inline-block;">${info.info}</div>
+
+<div style=" height: 40px; font-size: 14px;line-height:2.2;display:inline-block;"><pre>${info.info}</pre></div>
 
 <div style=" height: 60px;">
    <!--  <img id="headImg" src="${info.users.headImg}">  -->

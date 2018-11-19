@@ -43,4 +43,7 @@ public interface CommentService {
     List<CommentApp> comment(Long userId);
     
     int deleteComment(Long comment);
+    
+    int deleteCommentHistory(Long id);
+
 }

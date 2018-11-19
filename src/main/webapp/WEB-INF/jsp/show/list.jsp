@@ -65,9 +65,16 @@
             </td>  
             <td>
                 <button data-id="${item.id}" class="del btn-sm glyphicon glyphicon-trash btn btn-danger"></button>
-                <button data-id="${item.id}" type="button" class="move btn-sm  btn btn-warning" data-toggle="modal"
+              <!--  <button data-id="${item.id}" type="button" class="move btn-sm  btn btn-warning" data-toggle="modal"
                         data-target="#move"><c:if test="${item.showPush!=0}">【已】</c:if>推送
                 </button>
+                -->
+
+                <button type="button" data-id="${item.id}" class="change btn-sm  btn btn-warning" data-toggle="modal"
+                            data-target="#move">
+                        移动
+                    </button>
+
             </td>
             <td>${item.webUrl}</td>
         </tr>
@@ -106,7 +113,6 @@
 </nav>
 <!-- 分页导航结束 -->
 <%--推送的拟态框--%>
-<!-- Modal -->
 <div class="modal fade" id="move" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -132,7 +138,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" id="qx" class="btn btn-default" data-dismiss="modal">取消</button>
-                <button type="button" id="push" class="btn btn-primary">确定</button>
+                <button type="button" id="saveChange" class="btn btn-primary">确定</button>
             </div>
         </div>
     </div>
@@ -160,8 +166,36 @@
         }
     });
 
+    
+    
+        var changElement;
+        $('.change').click(function () {
+        	itemID = $(this).data("id");
+            itemButton = $(this);
+            changElement=$(this);
+        });        
+        $("#saveChange").click(function () {
+        	 var type = $("#three").val();
+             window.console.log(three);
+             var typeName;
+             for (var i = 0; i < threeAjax.result.length; i++) {
+                 if (threeAjax.result[i].id == type) {
+                     typeName = threeAjax.result[i].typeName;
+                     break;
+                 }
+             }
+            var s="已移动";//+'->'+changeTwoTypeOptionText+'->'+changeThreeTypeOptionText;
+           $.post('/informationall/changeThreeType',{changeId: itemID, changeThreeType: type},function (data) {
+                if (200 === data.code){
+                    changElement.parent().parent().children().eq(3).text(s);
+                    $("#qx").click();
+                }
+            })
+         });
+        
+        
 
-    /*移动*/
+  /*移动
     $(".move").click(function () {
         itemID = $(this).data("id");
         itemButton = $(this);
@@ -187,7 +221,7 @@
                 }
             })
         }
-    });
+    });*/
   //4.18修改三级联动
     $("#selectOneType").change(function () {
     	

@@ -6,6 +6,7 @@ import com.worldkey.entity.InformationExample;
 import com.worldkey.entity.Show;
 import com.worldkey.entity.WindowShow;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.ResultMap;
 import org.apache.ibatis.annotations.Select;
@@ -34,7 +35,7 @@ public interface InformationAllMapper {
 
     InformationAll selectByPrimaryKey(Long id);
     
-    @Select("select  i.id, i.create_date, i.title, i.title_img, i.type, i.weburl, i.abstracte, i.auther, i.point_number, i.checked, i.users,i.classify,i.competitive,i.user_brand,i.info,users.pet_name from information_all AS i left join users on users.id = i.users where i.id=#{id}")
+    @Select("select  i.id, i.create_date, i.title, i.title_img, i.type, i.weburl, i.abstracte, i.auther, i.point_number, i.checked, i.users,i.classify,i.competitive,i.user_brand,i.info,users.pet_name from information_all AS i left join users on users.id = i.users where i.id=#{id} and i.state=0")
     InformationAll selectByPrimaryKey1(Long id);
 
     InformationExample selectById(Long id);
@@ -42,6 +43,7 @@ public interface InformationAllMapper {
     int updateByPrimaryKeySelective(InformationAll record);
 
     int updateByPrimaryKey(InformationAll record);
+    
 
     List<InformationAll> findAll();
 
@@ -68,7 +70,9 @@ public interface InformationAllMapper {
             "information_all AS i " +
             "LEFT JOIN praise_num AS pm ON i.id = pm.information " +
             "LEFT JOIN users on users.id=i.users "+
-            "WHERE type=#{type} " +
+            "WHERE type=#{type} AND " +
+            "i.state=0 AND"+
+            "i.draft=1 "+
             "ORDER BY " +
             "i.create_date DESC")
     List<BaseShow> selectBySelective1(InformationAll vo);
@@ -106,6 +110,7 @@ public interface InformationAllMapper {
             "i.classify " +
             "FROM " +
             "information_all AS i " +
+            "where i.state=0 and i.draft=1 "+
             "ORDER BY " +
             "i.point_number DESC")
     List<InformationAll> selectOrderByPointNumber();
@@ -119,7 +124,7 @@ public interface InformationAllMapper {
             "FROM " +
             "information_all AS i " +
             "WHERE  " +
-            "i.users=#{id} and i.checked=2  " +
+            "i.users=#{id} and i.checked=2 and i.state=0 and i.draft=1 " +
             "ORDER BY id DESC")
     List<InformationAll> selectUsersDraft(Long id);
 
@@ -184,6 +189,8 @@ public interface InformationAllMapper {
             "                WHERE\n" +
             "                     t.one_type=#{oneType}\n" +
             "            ) AND (i.checked=1 or i.checked=4) \n" +
+            "              AND i.state = 0 \n"+
+            "              AND i.draft=1 \n"+
             "        ORDER BY  i.create_date DESC")
    // @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectShowByOneType(@Param("oneType") Integer oneType);
@@ -206,7 +213,7 @@ public interface InformationAllMapper {
             "            information_all AS i\n" +
             "            LEFT JOIN praise_num AS pm ON i.id = pm.information\n" +
             "        WHERE\n" +
-            "            i.type =#{twoType} AND (i.checked=1 or i.checked=4) AND i.users=u.id  "+
+            "            i.type =#{twoType} AND (i.checked=1 or i.checked=4) AND i.users=u.id  AND i.state=0 AND i.draft=1 "+
             "        ORDER BY  i.create_date DESC")
    // @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectShowByTwoType(@Param("twoType") Integer twoType);
@@ -233,6 +240,8 @@ public interface InformationAllMapper {
             "            information_all AS i\n" +
             "            LEFT JOIN praise_num AS pm ON i.id = pm.information\n" +
             "        WHERE\n" +
+            "            i.state=0 AND \n"+
+            "            i.draft=1 AND \n "+
             "            i.users=u.id AND (i.checked=1 or i.checked=4)  \n" +
             "          AND  i.type IN (SELECT ttt.id FROM three_type AS ttt WHERE ttt.two_type IN  \n"+
             "                         (SELECT tt.id FROM two_type AS tt WHERE tt.one_type IN    \n"+
@@ -265,7 +274,7 @@ public interface InformationAllMapper {
             "            LEFT JOIN praise_num AS pm ON i.id = pm.information\n" +
             "            LEFT JOIN apply_record AS a  ON a.information =i.id  \n" +
             "        WHERE\n" +
-            "            i.type =tt.id AND (i.checked=1 or i.checked=4) AND i.users=u.id AND t.id=#{twoType}  "+
+            "            i.type =tt.id AND (i.checked=1 or i.checked=4) AND i.users=u.id AND t.id=#{twoType} AND i.state=0 AND i.draft=1 "+
             "        ORDER BY  i.create_date DESC")
   //  @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectShowThreeTypeAllByTwoType(@Param("twoType") Integer twoType);
@@ -291,7 +300,7 @@ public interface InformationAllMapper {
             "            LEFT JOIN praise_num AS pm ON i.id = pm.information\n" +
             "            LEFT JOIN apply_record AS a  ON a.information =i.id  \n" +
             "        WHERE\n" +
-            "            i.type =#{threeType} AND (i.checked=1 or i.checked=4) AND i.users=u.id  "+
+            "            i.type =#{threeType} AND (i.checked=1 or i.checked=4) AND i.users=u.id AND i.state=0 AND i.draft=1 "+
             "        ORDER BY  i.create_date DESC")
    // @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectShowByThreeType(@Param("threeType") Integer threeType);
@@ -321,7 +330,7 @@ public interface InformationAllMapper {
             "			inner join users on users.id=i.users "+
             "            left join praise_num AS pm ON i.id = pm.information\n" +
             "        WHERE\n" +
-            "            i.type =#{threeType} and i.stick=0   "+
+            "            i.type =#{threeType} and i.stick=0 and i.state=0 and i.draft=1 "+
             "        ORDER BY  i.create_date DESC")
 //    @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectShowByThreeType1(@Param("threeType") Integer threeType);
@@ -343,7 +352,7 @@ public interface InformationAllMapper {
             " from information_all "+
             "inner join users on users.id=information_all.users " +
               "left join praise_num AS pm ON pm.information = information_all.id " +
-              "where classify=0 "+
+              "where classify=0 and state=0 and draft=1 "+
             " and users.id=#{userId} order by information_all.id desc")
     List<BaseShow> selectByclassify(Long userId);
     
@@ -371,6 +380,8 @@ public interface InformationAllMapper {
             "        INNER JOIN two_type AS t ON r.two_type = t.id " +
             "        INNER JOIN one_type AS o ON t.one_type = o.id " +
             "             WHERE o.id = #{oneType} " +
+            "              AND i.state=0 "+
+            "              AND i.draft=1 "+
             "                AND (i.title LIKE concat('%',#{word},'%') OR  i.info LIKE  concat('%', #{word}, '%')) " +
             "        order by i.id desc")
     List<Show> selectShowByOneTypeAll(@Param("oneType") Integer oneType, @Param("word") String word);
@@ -386,6 +397,8 @@ public interface InformationAllMapper {
             "            information_all AS i  " +
             "        WHERE " +
             "            i.type =#{twoType}" +
+            "            i.state=0 "+
+            "            i.draft=1 "+
             "        ORDER BY  i.create_date DESC")
     List<Show> selectShowByTwoTypeAll(@Param("twoType") Integer twoType);
 
@@ -395,6 +408,33 @@ public interface InformationAllMapper {
     List<BaseShow> SelectByIds(List<Long> items);
     
     //推荐功能暂停，暂时采用发布时间排序，2018.4.13
+//    @Select("SELECT " +
+//            "i.id, " +
+//            "i.title AS title, " +
+//            "i.title_img AS titleImg," +
+//            "i.classify	AS classify," +
+//            "pm.praise_num AS praiseNum," +
+//            "i.weburl AS webUrl," +
+//            "i.create_date AS createDate," +
+//            "users.login_name AS loginName,"+
+//            "users.head_img AS headImg , "+
+//            "users.id AS usersId, " +
+//            "i.auther AS author, " +
+//            "users.pet_name AS petName "+
+//            "FROM " +
+//            "information_all AS i " +
+//            "LEFT JOIN praise_num AS pm ON i.id = pm.information " +
+//            "LEFT JOIN users on users.id=i.users "+
+//            "WHERE type is not null " +
+//            "AND i.checked=1 "+
+//            "AND i.state=0 "+
+//            "AND i.draft=1 "+
+//            "AND (i.classify=1 or (i.classify=0 AND i.show_push!=0)) "+
+//            "ORDER BY " +
+//            "i.create_date DESC")
+////    @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
+//    List<BaseShow> selectOrderByPointNumberShowBean();
+    
     @Select("SELECT " +
             "i.id, " +
             "i.title AS title, " +
@@ -412,19 +452,21 @@ public interface InformationAllMapper {
             "information_all AS i " +
             "LEFT JOIN praise_num AS pm ON i.id = pm.information " +
             "LEFT JOIN users on users.id=i.users "+
-            "WHERE type is not null " +
-            "AND i.checked=1 "+
-            "AND (i.classify=1 or (i.classify=0 AND i.show_push!=0)) "+
+            "WHERE type=10470 " +
+            "AND i.state=0 "+
+            "AND i.draft=1 "+
             "ORDER BY " +
             "i.create_date DESC")
 //    @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectOrderByPointNumberShowBean();
+    
+    
     @Select("SELECT " +
             "COUNT(*) " +
             "FROM " +
             " information_all AS i " +
             "WHERE " +
-            "i.create_date >STR_TO_DATE('${date} 00:00:00','%Y-%m-%d %H:%i:%s')  AND i.users=#{usersId} and (i.checked=1 or i.checked=4 )")
+            "i.create_date >STR_TO_DATE('${date} 00:00:00','%Y-%m-%d %H:%i:%s')  AND i.users=#{usersId} and (i.checked=1 or i.checked=4 ) and i.state=0 and i.draft=1")
     Integer selectBetweenCreateDate(@Param(value ="date") String date,@Param(value ="usersId")Long usersId);
 
    
@@ -445,7 +487,7 @@ public interface InformationAllMapper {
             "            information_all AS i  " +
             "		 INNER JOIN users on users.id = i.users "+	
             "        WHERE " +
-            "            i.type =#{threeType}" +
+            "            i.type =#{threeType} and i.state=0 and i.draft=1 " +
             "        ORDER BY  i.create_date DESC")
     List<Show> selectShowByThreeTypeAll(@Param("threeType") Integer threeType);
     
@@ -463,10 +505,10 @@ public interface InformationAllMapper {
 
     
     
-    @Select("select title,title_img,weburl from information_all where id = #{id} ")
+    @Select("select title,title_img,weburl from information_all where id = #{id}")
     InformationAll selectinfo(Long id);
     
-    @Select("select id from information_all order by id desc limit 0,1")
+    @Select("select id from information_all where state=0 and draft=1 order by id desc limit 0,1")
     Long getNewId();
     
     
@@ -491,6 +533,8 @@ public interface InformationAllMapper {
             "            i.type =#{threeType}   "+
             "            and i.classify=1 " +
             "            and users.id=#{userId}    " +
+            "            and i.state=0  "+
+            "            and i.draft=1  "+
             "        ORDER BY  i.create_date DESC")
    // @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
     List<BaseShow> selectype(@Param("threeType") Integer threeType,@Param("userId") Long userId);
@@ -518,6 +562,8 @@ public interface InformationAllMapper {
             "            i.classify=1 " +
             "            and users=#{userId}    " +
             "            and i.competitive!=0    " +
+            "            and i.state=0  "+
+            "            and i.draft=1  "+
             "        ORDER BY i.competitive")
     List<WindowShow> selectWindow(@Param("userId") Long userId);
     
@@ -527,10 +573,10 @@ public interface InformationAllMapper {
     @Update("update information_all set competitive=0 where id=#{id}")
     Integer putElegant0(Long id);
     
-    @Select("select count(competitive) from information_all where users=#{userId} and competitive!=0")
+    @Select("select count(competitive) from information_all where users=#{userId} and competitive!=0 and state=0 and draft=1")
     Integer MaxNum(Long userId);
 
-    @Select("select competitive from information_all where id=#{id}")
+    @Select("select competitive from information_all where id=#{id} and state=0 and draft=1")
     Integer selectCompetitive(Long id);
     
     @Select("SELECT " +
@@ -549,10 +595,10 @@ public interface InformationAllMapper {
             "i.classify " +
             "FROM " +
             "information_all AS i " +
-            "where users=#{id} and user_brand=1")
+            "where users=#{id} and user_brand=1 and state=0 and draft=1")
     InformationAll selectBrandArticle(Long id);
     
-    @Select("select MAX(competitive) from information_all where users=#{id}")
+    @Select("select MAX(competitive) from information_all where users=#{id} and state=0 and draft=1")
     Integer selectMaxCompetitive(Long id);
     
     
@@ -562,7 +608,7 @@ public interface InformationAllMapper {
     @Update("update information_all set stick=0 where id=#{id}")
     Integer updateStickup(Long id);
     
-    @Select("select stick from information_all where id=#{id}")
+    @Select("select stick from information_all where id=#{id} and state=0 and draft=1")
     Integer selectStick(Long id);
     
     @Select("SELECT\n" +
@@ -584,14 +630,14 @@ public interface InformationAllMapper {
             "			inner join users on users.id=i.users "+
             "            left join praise_num AS pm ON i.id = pm.information\n" +
             "        WHERE\n" +
-            "            i.type =#{type} and i.stick=1   "+
+            "            i.type =#{type} and i.stick=1 and i.state=0 and i.draft=1 "+
             "        ORDER BY  i.stick_date DESC")
     List<BaseShow> findStick(Integer type);
 
     @Select("SELECT\n" +
             "            i.id,\n" +
             "            i.title       AS title,\n" +
-            "            i.title_img   AS titleImg,\n" +
+            "            i.title_img	   AS titleImg,\n" +
             "			 i.classify    AS classify,\n"	+
             "            i.weburl      AS webUrl,\n" +
             "            i.create_date AS createDate,\n" +
@@ -610,4 +656,99 @@ public interface InformationAllMapper {
             "        WHERE\n" +
             "            i.id =6258 ")
     List<BaseShow> getshequ();
+    
+    @Update("update information_all set state = 1 where id=#{id}")
+    int deleteInformation(Long id);
+    
+    
+    //编辑
+    @Select("select title from information_all where id=#{id}")
+    String findTitle(Long id);
+    
+    @Select("select info from information_all where id=#{id}")
+    String findInfo(Long id);
+    
+    @Update("update information_all set title=#{title},title_img=#{titleImgs},info=#{info} where id =#{id}")
+    int compileto(@Param("id") Long id,@Param("title") String title,@Param("titleImgs") String titleImgs,@Param("info")String info);
+    
+    
+    @Select("SELECT\n" +
+            "            i.id,\n" +
+            "            i.title       AS title,\n" +
+            "            i.title_img   AS titleImg,\n" +
+            "			 i.classify    AS classify,\n"	+
+            "            i.weburl      AS webUrl,\n" +
+            "            i.create_date AS createDate,\n" +
+            "  			 users.login_name AS loginName,\n"+
+            "			 users.head_img AS headImg,\n"+
+            "            i.auther AS author,\n" +
+            "			 users.pet_name AS petName,\n "+
+            "			 i.users  AS usersId\n"+  
+            "        FROM\n" +
+            "            information_all AS i\n" +
+            "        inner join users on users.id=i.users "+
+            "        WHERE\n" +
+            "             i.classify=1 " +
+            "            and users.id=#{userId}    " +
+            "            and i.state=0  "+
+            "            and i.draft=0  "+
+            "        ORDER BY  i.create_date DESC")
+   // @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
+    List<BaseShow> findDraft(@Param("userId") Long userId);
+    
+    @Delete("delete from information_all where id=#{id}")
+    int deleteDraft(Long id);
+    
+    
+    //说说草稿箱
+    @Select(" SELECT "
+    		+ "information_all.id,"
+    		+ "information_all.title,"
+    		+ "information_all.create_date,"
+    		+ "information_all.title_img,"
+    		+ "information_all.info,"
+    		+ "information_all.type,"
+    		+ "information_all.show_push,"
+    		+ "information_all.weburl," +
+    		  "users.id as usersId," +
+    		  "users.pet_name as petName,"+
+    		  "users.head_img,users.login_name ,"+
+            " from information_all "+
+            "inner join users on users.id=information_all.users " +
+              "where classify=0 and state=0 and draft=0 "+
+            " and users.id=#{userId} order by information_all.id desc")
+    List<BaseShow> selectByclassifyDraft(Long userId);
+    
+    @Update("update information_all set draft=1 where id = #{id}")
+    int	issue(Long id);
+    
+    @Select("SELECT " +
+            "i.id, " +
+            "i.title AS title, " +
+            "i.title_img AS titleImg," +
+            "i.classify	AS classify," +
+            "pm.praise_num AS praiseNum," +
+            "i.weburl AS webUrl," +
+            "i.create_date AS createDate," +
+            "users.login_name AS loginName,"+
+            "users.head_img AS headImg , "+
+            "users.id AS usersId, " +
+            "i.auther AS author, " +
+            "users.pet_name AS petName "+
+            "FROM " +
+            "information_all AS i " +
+            "LEFT JOIN praise_num AS pm ON i.id = pm.information " +
+            "LEFT JOIN users on users.id=i.users "+
+            "WHERE i.users=#{id} " +
+            "AND i.classify=1 "+
+            "AND i.state=0 "+
+            "AND i.draft=1 "+
+            "AND i.type!=10470 " +
+            "ORDER BY " +
+            "i.create_date DESC")
+//    @ResultMap(value = "com.worldkey.mapper.InformationAllMapper.BaseShowResultMap")
+    List<BaseShow> myCreate(Long id);
+    
+    
+
 }

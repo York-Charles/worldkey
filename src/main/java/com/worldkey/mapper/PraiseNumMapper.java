@@ -1,6 +1,8 @@
 package com.worldkey.mapper;
 import com.worldkey.entity.Praise;
 import com.worldkey.entity.PraiseNum;
+
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.stereotype.Repository;
@@ -29,5 +31,8 @@ public interface PraiseNumMapper {
     
     @Select("select praise_num from praise_num where information = #{information}")
     Integer p(Integer information);
+    
+    @Delete("delete from praise_num where information=#{id}")
+    int deleteInformaiton(Integer id);
 
 }

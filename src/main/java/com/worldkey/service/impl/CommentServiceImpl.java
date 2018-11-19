@@ -9,7 +9,10 @@ import com.worldkey.entity.Praise;
 import com.worldkey.entity.PraiseApp;
 import com.worldkey.entity.Users;
 import com.worldkey.mapper.CommentMapper;
+import com.worldkey.mapper.HistoryMapper;
 import com.worldkey.mapper.InformationAllMapper;
+import com.worldkey.mapper.PraiseCommentMapper;
+import com.worldkey.mapper.PraiseCommentNumMapper;
 import com.worldkey.mapper.UsersMapper;
 import com.worldkey.service.CommentService;
 import com.worldkey.service.UsersService;
@@ -48,6 +51,12 @@ public class CommentServiceImpl implements CommentService {
 	private UsersMapper uMapper;
     @Resource
 	private InformationAllMapper iMapper;
+    @Resource
+	private PraiseCommentMapper pMapper;
+    @Resource
+	private HistoryMapper hMapper;
+    @Resource
+	private PraiseCommentNumMapper pnMapper;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -354,10 +363,22 @@ public class CommentServiceImpl implements CommentService {
 	@Override
 	public int deleteComment(Long commentId) {
 		List<Long> a = this.commentMapper.selectCommentId(commentId);
-		for(Long b:a){
+		if(a!=null){
+			for(Long b:a){
 			this.commentMapper.delete2(b);
+			this.pMapper.deleteC(b);
+			this.pnMapper.deleteComment(Integer.parseInt(b+""));
 		}
+		}
+		this.pMapper.deleteC(commentId);
+		this.pnMapper.deleteComment(Integer.parseInt(commentId+""));
 		int c = this.commentMapper.delete(commentId);
+		return c;
+	}
+	
+	@Override
+	public int deleteCommentHistory(Long id){
+		int c = this.hMapper.deleteInformation(id);
 		return c;
 	}
 

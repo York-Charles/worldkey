@@ -99,8 +99,11 @@ public class InformationAllController {
      */
     @RequestMapping("changeThreeType")
     @RequiresRoles("informationall")
-    public @ResponseBody
-    ResultUtil changeThreeType(Integer changeId, Integer changeThreeType) {
+    @ResponseBody
+    public ResultUtil changeThreeType(Integer changeId, Integer changeThreeType,@RequestHeader("host") String host) {
+    	if(changeThreeType==10470){
+    		return this.push(changeId, changeThreeType, host);
+    	}
         String typeName = this.allService.changeThreeType(changeId, changeThreeType);
         return new ResultUtil(200, "ok", typeName);
         }
@@ -450,6 +453,11 @@ public class InformationAllController {
 	        PageInfo<BaseShow> info = this.allService.findStick(pageNum, pageSize, type,token);
 	        return new ResultUtil(200, "ok", info);
 	    }
-	
+	 
+
+	 public ResultUtil push(Integer changeId, Integer changeThreeType, @RequestHeader("host") String host) {
+			Integer integer = allService.showPush(changeId.longValue(), changeThreeType, host);
+			return new ResultUtil(200, "ok", integer);
+		}
 	
 }

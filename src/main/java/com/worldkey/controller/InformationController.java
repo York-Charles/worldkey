@@ -57,6 +57,7 @@ public class InformationController {
 		InformationAll vo = new InformationAll();
 		vo.setId(id);
 		vo.setChecked(1);
+		vo.setState(0);
 		Users users = (Users) session.getAttribute("users");
 		vo.setUsers(users);
 		boolean usersInformation = this.isUsersInformation(id, users);
@@ -157,6 +158,7 @@ public class InformationController {
 		}
 		vo.setUsers(users);
 		vo.setAuther(users.getPetName());
+		vo.setDraft(1);
 		this.allService.add(vo, host);
 		return "redirect:/users/information/writeArticle";
 	}

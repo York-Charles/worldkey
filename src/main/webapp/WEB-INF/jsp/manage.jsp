@@ -75,6 +75,7 @@
                 <a class="btn btn-default btn-block" href="show/manageList?oneType=26" target="new">闲置</a>
                 <!--  <a class="btn btn-default btn-block" href="show/manageList?oneType=27" target="new">俱乐部</a>  -->
                <a class="btn btn-default btn-block" href="show/manageList?oneType=33" target="new">说说</a>
+               <a class="btn btn-default btn-block" href="show/manageList?oneType=35" target="new">精选</a>
                 <a class="btn btn-default btn-block" href="system/tongZhi" target="new">推送通知</a> 
                
         </div>

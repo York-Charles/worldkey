@@ -22,9 +22,12 @@ public interface InformationAllService {
     
     
     PageInfo<BaseShow> findShuoshuo(Long userId,Integer pageNum,Integer pageSize);
-    
+    PageInfo<BaseShow> findShuoshuoDraft(Long userId,Integer pageNum,Integer pageSize);
     String add1(InformationAll vo, String host);
     String addShuo(InformationAll vo, String host);
+    
+    String addShuoDraft(InformationAll vo, String host);
+    
     InformationAll update(InformationAll vo, String host, MultipartFile file, String oldTitleImg);
     InformationAll update(Long id);
     InformationAll info(Long id);
@@ -79,6 +82,7 @@ public interface InformationAllService {
     List<Show> findShowByTwoTypeAll(Integer twoType);
 
     Integer showPush(Long itemID, Integer type, String host);
+    Integer showPush1(Long itemID, Integer type, String host);
 
     List<BaseShow> findByIds1(List<Long> items);
 
@@ -123,4 +127,17 @@ public interface InformationAllService {
    PageInfo<BaseShow> findStick(Integer pageNum, Integer pageSize, Integer type,String token);
    
    PageInfo<BaseShow> getshequ(Integer pageNum,Integer pageSize);
+   
+   //文章说说删除
+   Integer deleteInformation(Long id);
+   //编辑
+   String findTitle(Long id);
+   
+   String findInfo(Long id);
+  
+   Integer compileto(Long id,String titleImgs,String title,String info);
+   
+   //精选
+   List<BaseShow> myCreate(Long id);
+   
 }

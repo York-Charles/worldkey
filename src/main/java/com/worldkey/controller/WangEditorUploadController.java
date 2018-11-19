@@ -68,4 +68,26 @@ public class WangEditorUploadController {
         stringObjectHashMap.put("data",strings);
         return stringObjectHashMap;
     }
+    
+    @RequestMapping("/upload3")
+    @ResponseBody
+    public  Object  to3(HttpServletRequest request, HttpServletResponse response, MultipartFile file,String name) throws IOException, ServletException {
+        response.setContentType("text/html;charset=UTF-8");
+        request.setCharacterEncoding("UTF-8");
+        HashMap<String, Object> stringObjectHashMap = new HashMap<>();
+        stringObjectHashMap.put("errno","0");
+        // 文件类型限制
+        String[] allowedType = {"image/bmp", "image/gif", "image/jpeg", "image/png"};
+        log.debug(file.isEmpty()+"");
+        boolean allowed = Arrays.asList(allowedType).contains(file.getContentType());
+        if (!allowed) {
+            return "error|不支持的类型";
+        }
+        String name1 = name.replace("/storage/emulated/0/Android/data/life.dubai.com.mylife/files/", "");
+        String realPath = new FileUploadUtilAsync().getFileName2(request.getHeader("host"), file,name1);
+        // 返回图片的URL地址
+        String[]strings={realPath};
+        stringObjectHashMap.put("data",strings);
+        return stringObjectHashMap;
+    }
 }

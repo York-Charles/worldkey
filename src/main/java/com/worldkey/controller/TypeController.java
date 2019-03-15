@@ -353,7 +353,7 @@ public class TypeController {
 				groupC.setId(groupId);
 				this.threeTypeService.updateContent(groupC);
 			}
-			return new ResultUtil(200,"ok","更新成功！");
+			return new	 ResultUtil(200,"ok","更新成功！");
 		}
 		return new ResultUtil(500, "error", "您不是组长，不能更改小组设定！");
 	}

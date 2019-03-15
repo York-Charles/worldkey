@@ -189,7 +189,7 @@ public class CommentController {
       		SimpleDateFormat dfs = new SimpleDateFormat("MM月dd日 HH:mm"); 
             String datess = dfs.format(days);
       		h.setCommentCreateTime(datess); 
-      		
+
       		Comment ccc = this.commenMapper.selectByPrimaryKey1(c.getComment());
       		 Long information = ccc.getInformation();
              InformationAll infos = this.informationAllService.info(information);

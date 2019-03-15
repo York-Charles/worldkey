@@ -196,8 +196,18 @@
 			<version>4.1.20.Final</version>
 			<scope>compile</scope>
 		</dependency>
-		
 
+		<!-- javacv -->
+		<dependency>
+		<groupId>org.bytedeco</groupId>
+		<artifactId>javacv-platform</artifactId>
+		<version>1.4.4</version>
+	</dependency>
+		<dependency>
+			<groupId>org.bytedeco</groupId>
+			<artifactId>javacv</artifactId>
+			<version>1.4.4</version>
+		</dependency>
 	</dependencies>
 
 	<build>

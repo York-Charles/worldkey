@@ -78,7 +78,7 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
 			}
 		};
 		List<String> appell = null;
-		if (sex == 0) {
+		if (sex == 1) {
 			appell = appellation.subList(0, 5);
 		} else {
 			appell = appellation.subList(5, 10);
@@ -283,5 +283,4 @@ public class CoffeeBarUserServiceImpl implements CoffeeBarUserService {
     public Map<String, Object> WeggenNachrichten(Integer userId) {
         return null;
     }
-
 }

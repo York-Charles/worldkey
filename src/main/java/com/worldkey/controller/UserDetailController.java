@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,7 @@ import com.worldkey.util.ResultUtil;
 @Controller
 @ResponseBody
 @RequestMapping("uDetail")
+@Slf4j
 public class UserDetailController {
 
 	@Resource
@@ -84,6 +86,7 @@ public class UserDetailController {
 			MultipartFile file = ((MultipartHttpServletRequest) request).getFile("file" + i);
 			if (!file.isEmpty()) {
 				boolean allowed = Arrays.asList(allowedType).contains(file.getContentType());
+				log.info(file.getContentType()+"------------------------");
 				if (!allowed) {
 					return new ResultUtil(500, "error", "不支持的文件类型!");
 				}

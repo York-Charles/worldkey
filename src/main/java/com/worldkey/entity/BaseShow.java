@@ -1,0 +1,39 @@
+package com.worldkey.entity;
+
+import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.util.Date;
+/**
+ * 基础展示模块
+ *
+ */
+@Data
+public class BaseShow {
+    private  String title;
+    private  String titleImg;
+    private  String info;
+    private  Integer type;
+    private  String author;
+    private String webUrl;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createDate;
+    private  Integer praiseNum=0;
+    private  Integer commentNum=0;
+    private  Long id;
+    private  Long usersId;
+    private String loginName;
+    private String headImg;
+    private Integer applyRecordId;
+    private Integer imgNum;
+    private Integer isPraise=0;
+    private Integer competitive;
+    private String petName;
+    private Integer status;
+    private Integer stick;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date stickDate;
+    private Integer solve;
+  //判断乐赠xianzhi
+  		private Integer xl;
+}

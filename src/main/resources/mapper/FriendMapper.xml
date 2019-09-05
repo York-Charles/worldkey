@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.FriendMapper" >
+  <resultMap id="BaseResultMap" type="com.worldkey.entity.Friend" >
+    <result column="users" property="users" jdbcType="VARCHAR" />
+    <result column="friend" property="friend" jdbcType="VARCHAR" />
+    <result column="note" property="note" jdbcType="VARCHAR" />
+  </resultMap>
+  <insert id="insert" parameterType="com.worldkey.entity.Friend" >
+    insert into friend (users, friend, note
+      )
+    values (#{users,jdbcType=VARCHAR}, #{friend,jdbcType=VARCHAR}, #{note,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.worldkey.entity.Friend" >
+    insert into friend
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="users != null" >
+        users,
+      </if>
+      <if test="friend != null" >
+        friend,
+      </if>
+      <if test="note != null" >
+        note,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="users != null" >
+        #{users,jdbcType=VARCHAR},
+      </if>
+      <if test="friend != null" >
+        #{friend,jdbcType=VARCHAR},
+      </if>
+      <if test="note != null" >
+        #{note,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+</mapper>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.ActionMapper">
+
+	<resultMap id="BaseResultMap" type="com.worldkey.entity.Action">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap id="selectByAdminResultMap" type="com.worldkey.entity.Action">
+		<id column="id" property="id" jdbcType="INTEGER" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="url" property="url" jdbcType="VARCHAR" />
+		<result column="barname" property="barName" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Base_Column_List">
+		id, name, url
+	</sql>
+	<select id="selectAll" resultType="com.worldkey.entity.Action">
+		SELECT
+		action.id,
+		action.`name`,
+		action.url
+		FROM
+		action
+	</select>
+	<select id="selectByRoleId" resultType="com.worldkey.entity.Action"
+		parameterType="java.lang.Integer">
+		SELECT action.id AS id, action.`name` AS `name`, action.url AS url
+		FROM action
+		INNER JOIN role_action ON role_action.action = action.id
+		WHERE role_action.role = #{id,jdbcType=INTEGER}
+	</select>
+	<select id="selectByAdmin" resultType="com.worldkey.entity.Action"
+		parameterType="java.lang.Integer">
+		SELECT
+		action.id,
+		action.`name`,
+		action.url
+		FROM
+		action,manage_bar,role_action,admin_role,role,admin
+
+		WHERE
+		role_action.action = action.id AND
+		admin_role.admin =
+		admin.id AND
+		role_action.role = role.id AND
+		admin_role.role = role.id
+		AND
+		admin.id=#{id,jdbcType=INTEGER}
+
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Integer">
+		select
+		<include refid="Base_Column_List" />
+		from action
+		where id = #{id,jdbcType=INTEGER}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+		delete from action
+		where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<insert id="insert" parameterType="com.worldkey.entity.Action" useGeneratedKeys="true" keyProperty="id">
+		insert into action (id, name,
+		url)
+		values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR},
+		#{url,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.worldkey.entity.Action">
+		insert into action
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="name != null">
+				name,
+			</if>
+			<if test="url != null">
+				url,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=INTEGER},
+			</if>
+			<if test="name != null">
+				#{name,jdbcType=VARCHAR},
+			</if>
+			<if test="url != null">
+				#{url,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<update id="updateByPrimaryKeySelective" parameterType="com.worldkey.entity.Action">
+		update action
+		<set>
+			<if test="name != null">
+				name = #{name,jdbcType=VARCHAR},
+			</if>
+			<if test="url != null">
+				url = #{url,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.worldkey.entity.Action">
+		update action
+		set
+		name = #{name,jdbcType=VARCHAR},
+		url = #{url,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=INTEGER}
+	</update>
+</mapper>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.UserGroupMapper">
+    <resultMap id="BaseResultMap" type="com.worldkey.entity.UserGroup">
+        <result column="user_id" property="userId" jdbcType="BIGINT"/>
+        <result column="group_id" property="groupId" jdbcType="INTEGER"/>
+    </resultMap>
+    
+    <insert id="insertUG" parameterType="com.worldkey.entity.UserGroup">
+    	insert into user_group values (#{userId,jdbcType=BIGINT},#{groupId,jdbcType=INTEGER})
+    </insert>
+</mapper>

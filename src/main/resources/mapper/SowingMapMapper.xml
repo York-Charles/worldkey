@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.SowingMapMapper">
+	<resultMap id="BaseResultMap" type="com.worldkey.entity.SowingMap">
+		 <id column="id" property="id" jdbcType="INTEGER"/>
+		 <result column="sowing_img" property="sowingImg" jdbcType="VARCHAR"/>
+		 <result column="one_type" property="oneType" jdbcType="INTEGER"/>
+		 <result column="two_type" property="twoType" jdbcType="INTEGER"/>
+	</resultMap>
+		
+		<select id="getSowingImg" resultType="com.worldkey.entity.SowingMap" parameterType="java.util.Map">
+			select sowing_img,two_type from sowing_map 
+			<where>
+				one_type=#{oneType,jdbcType=INTEGER} 
+				<if test="twoType!=null">
+					and two_type=#{twoType}
+				</if>
+			</where>
+		</select>
+</mapper>

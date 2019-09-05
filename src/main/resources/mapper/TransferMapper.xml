@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.worldkey.mapper.TransferMapper" >
+  <resultMap id="BaseResultMap" type="com.worldkey.entity.Transfer" >
+    <id column="out_biz_no" property="outBizNo" jdbcType="VARCHAR" />
+    <result column="user_id" property="userId" jdbcType="BIGINT" />
+    <result column="amount" property="amount" jdbcType="DECIMAL" />
+    <result column="order_id" property="orderId" jdbcType="VARCHAR" />
+    <result column="pay_date" property="payDate" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="payee_account" property="payeeAccount" jdbcType="VARCHAR" />
+    <result column="create_time" property="createTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    out_biz_no, user_id, amount, order_id, pay_date, remark, payee_account, create_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.String" >
+    select 
+    <include refid="Base_Column_List" />
+    from transfer
+    where out_biz_no = #{outBizNo,jdbcType=VARCHAR}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.String" >
+    delete from transfer
+    where out_biz_no = #{outBizNo,jdbcType=VARCHAR}
+  </delete>
+  <insert id="insert" parameterType="com.worldkey.entity.Transfer" >
+    insert into transfer (out_biz_no, user_id, amount, 
+      order_id, pay_date, remark, 
+      payee_account, create_time)
+    values (#{outBizNo,jdbcType=VARCHAR}, #{userId,jdbcType=BIGINT}, #{amount,jdbcType=DECIMAL}, 
+      #{orderId,jdbcType=VARCHAR}, #{payDate,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, 
+      #{payeeAccount,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP})
+  </insert>
+  <insert id="insertSelective" parameterType="com.worldkey.entity.Transfer" >
+    insert into transfer
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="outBizNo != null" >
+        out_biz_no,
+      </if>
+      <if test="userId != null" >
+        user_id,
+      </if>
+      <if test="amount != null" >
+        amount,
+      </if>
+      <if test="orderId != null" >
+        order_id,
+      </if>
+      <if test="payDate != null" >
+        pay_date,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="payeeAccount != null" >
+        payee_account,
+      </if>
+      <if test="createTime != null" >
+        create_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="outBizNo != null" >
+        #{outBizNo,jdbcType=VARCHAR},
+      </if>
+      <if test="userId != null" >
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="amount != null" >
+        #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="orderId != null" >
+        #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="payDate != null" >
+        #{payDate,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="payeeAccount != null" >
+        #{payeeAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.worldkey.entity.Transfer" >
+    update transfer
+    <set >
+      <if test="userId != null" >
+        user_id = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="amount != null" >
+        amount = #{amount,jdbcType=DECIMAL},
+      </if>
+      <if test="orderId != null" >
+        order_id = #{orderId,jdbcType=VARCHAR},
+      </if>
+      <if test="payDate != null" >
+        pay_date = #{payDate,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="payeeAccount != null" >
+        payee_account = #{payeeAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where out_biz_no = #{outBizNo,jdbcType=VARCHAR}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.worldkey.entity.Transfer" >
+    update transfer
+    set user_id = #{userId,jdbcType=BIGINT},
+      amount = #{amount,jdbcType=DECIMAL},
+      order_id = #{orderId,jdbcType=VARCHAR},
+      pay_date = #{payDate,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR},
+      payee_account = #{payeeAccount,jdbcType=VARCHAR},
+      create_time = #{createTime,jdbcType=TIMESTAMP}
+    where out_biz_no = #{outBizNo,jdbcType=VARCHAR}
+  </update>
+</mapper>
